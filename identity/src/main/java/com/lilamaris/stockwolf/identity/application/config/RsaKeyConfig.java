@@ -22,10 +22,10 @@ public class RsaKeyConfig {
     @Bean
     public RSAKey rsaKey() throws Exception {
         Resource privateKeyResource = new ClassPathResource("keys/private/private.pem");
-        Resource publicKeyResource  = new ClassPathResource("keys/public/public.pem");
+        Resource publicKeyResource = new ClassPathResource("keys/public/public.pem");
 
         RSAPrivateKey privateKey = readPrivateKey(privateKeyResource);
-        RSAPublicKey publicKey   = readPublicKey(publicKeyResource);
+        RSAPublicKey publicKey = readPublicKey(publicKeyResource);
 
         return new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
