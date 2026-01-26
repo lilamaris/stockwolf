@@ -1,10 +1,10 @@
-package com.lilamaris.stockwolf;
+package com.lilamaris.stockwolf.identity;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class StockwolfApplicationTests {
+class IdentityApplicationTests {
 
 	@Test
 	void contextLoads() {

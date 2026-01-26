@@ -1,13 +1,13 @@
-package com.lilamaris.stockwolf;
+package com.lilamaris.stockwolf.identity;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class StockwolfApplication {
+public class IdentityApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(StockwolfApplication.class, args);
+		SpringApplication.run(IdentityApplication.class, args);
 	}
 
 }
