@@ -1,10 +1,10 @@
 plugins {
 	java
-	id("org.springframework.boot") version "4.0.2"
+	id("org.springframework.boot") version "4.0.2" apply false
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "com.lilamaris"
+group = "com.lilamaris.stockwolf"
 version = "0.0.1-SNAPSHOT"
 description = "Demo project for Spring Boot"
 
@@ -24,12 +24,12 @@ subprojects {
 	apply(plugin = "java")
 	apply(plugin = "org.springframework.boot")
 	apply(plugin = "io.spring.dependency-management")
+
+	tasks.withType<Test> {
+		useJUnitPlatform()
+	}
 }
 
 repositories {
 	mavenCentral()
-}
-
-tasks.withType<Test> {
-	useJUnitPlatform()
 }
