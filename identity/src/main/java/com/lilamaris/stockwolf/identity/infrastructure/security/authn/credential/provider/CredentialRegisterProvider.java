@@ -29,7 +29,7 @@ public class CredentialRegisterProvider implements AuthenticationProvider {
             var rawPassword = auth.getRawPassword();
             var displayName = auth.getDisplayName();
 
-            var principal = userRegister.register(email, rawPassword, displayName);
+            var principal = userRegister.register(email, displayName, rawPassword);
             var token = issuer.issue(principal.userId());
 
             return new AuthenticatedToken(
