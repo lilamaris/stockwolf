@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class DefaultDomainException extends RuntimeException {
-    private final DomainErrorCode errorCode;
+    private final ErrorCode errorCode;
 
-    public DefaultDomainException(DomainErrorCode errorCode) {
+    public DefaultDomainException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
