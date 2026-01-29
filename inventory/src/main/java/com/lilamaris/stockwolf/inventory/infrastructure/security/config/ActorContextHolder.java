@@ -1,7 +1,7 @@
 package com.lilamaris.stockwolf.inventory.infrastructure.security.config;
 
-import com.lilamaris.stockwolf.inventory.application.exception.InventoryErrorCode;
-import com.lilamaris.stockwolf.inventory.application.exception.InventoryInvariantException;
+import com.lilamaris.stockwolf.inventory.application.exception.ApplicationErrorCode;
+import com.lilamaris.stockwolf.inventory.application.exception.ApplicationIllegalStateException;
 import com.lilamaris.stockwolf.inventory.application.port.out.Actor;
 import com.lilamaris.stockwolf.inventory.application.port.out.ActorContext;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,11 +19,11 @@ public class ActorContextHolder implements ActorContext {
     public Actor get() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
-            throw new InventoryInvariantException(InventoryErrorCode.UNIDENTIFIED_ACTOR);
+            throw new ApplicationIllegalStateException(ApplicationErrorCode.UNIDENTIFIED_ACTOR);
         }
         String principal = Optional.ofNullable(auth.getPrincipal())
                 .map(Object::toString)
-                .orElseThrow(() -> new InventoryInvariantException(InventoryErrorCode.UNIDENTIFIED_ACTOR));
+                .orElseThrow(() -> new ApplicationIllegalStateException(ApplicationErrorCode.UNIDENTIFIED_ACTOR));
 
         Set<String> authorities = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
