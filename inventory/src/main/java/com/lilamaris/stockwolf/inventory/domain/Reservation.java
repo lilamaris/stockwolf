@@ -43,6 +43,9 @@ public class Reservation {
     @Column(name = "expires_at")
     private Instant expiresAt;
 
+    @Version
+    private Long version;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -72,6 +75,26 @@ public class Reservation {
 
     public boolean isExpired() {
         return Instant.now().isAfter(expiresAt);
+    }
+
+    public boolean isReserved() {
+        return status == ReservationStatus.RESERVED;
+    }
+
+    public boolean isCommitted() {
+        return status == ReservationStatus.COMMITTED;
+    }
+
+    public boolean isCommittable() {
+        return status == ReservationStatus.RESERVED;
+    }
+
+    public boolean isCanceled() {
+        return status == ReservationStatus.CANCELED;
+    }
+
+    public boolean isCancelable() {
+        return status == ReservationStatus.RESERVED;
     }
 
     public void commit() {

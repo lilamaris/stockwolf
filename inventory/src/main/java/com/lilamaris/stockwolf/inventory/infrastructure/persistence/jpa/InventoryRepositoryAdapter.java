@@ -6,6 +6,7 @@ import com.lilamaris.stockwolf.inventory.infrastructure.persistence.jpa.reposito
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,7 +20,17 @@ public class InventoryRepositoryAdapter implements InventoryStore {
     }
 
     @Override
+    public List<Inventory> getAll(List<String> skuIds) {
+        return repository.findAllById(skuIds);
+    }
+
+    @Override
     public Inventory save(Inventory inventory) {
         return repository.save(inventory);
+    }
+
+    @Override
+    public List<Inventory> saveAll(List<Inventory> inventories) {
+        return repository.saveAll(inventories);
     }
 }

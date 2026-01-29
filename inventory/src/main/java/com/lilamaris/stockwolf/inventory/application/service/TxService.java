@@ -7,8 +7,9 @@ import com.lilamaris.stockwolf.inventory.application.port.out.InventoryStore;
 import com.lilamaris.stockwolf.inventory.application.port.out.ReservationStore;
 import com.lilamaris.stockwolf.inventory.domain.Inventory;
 import com.lilamaris.stockwolf.inventory.domain.Reservation;
+import com.lilamaris.stockwolf.inventory.domain.ReservationItem;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +27,11 @@ public class TxService {
     private final InventoryStore inventoryStore;
     private final ReservationStore reservationStore;
 
+    private final EntityManager em;
+
     @Retryable(
             includes = OptimisticLockingFailureException.class,
-            maxRetries = 7,
+            maxRetries = 10,
             delay = 50,
             multiplier = 2,
             jitter = 10,
@@ -38,27 +44,84 @@ public class TxService {
             int quantity
     ) {
         var reservation = Reservation.create(correlationId, Duration.ofMinutes(5));
-        var inventory = getInventory(skuId);
+        var inventory = inventoryStore.get(skuId)
+                .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.INVENTORY_NOT_FOUND));
 
         inventory.reserve(quantity);
         reservation.addItem(skuId, quantity);
 
-        try {
-            inventoryStore.save(inventory);
-            reservationStore.save(reservation);
-            return ReservationEntry.from(reservation);
-        } catch (DataIntegrityViolationException e) {
-            return ReservationEntry.from(getReservation(correlationId));
-        }
+        inventoryStore.save(inventory);
+        reservationStore.save(reservation);
+        return ReservationEntry.from(reservation);
     }
 
-    private Reservation getReservation(String correlationId) {
-        return reservationStore.getByCorrelationId(correlationId)
+    @Retryable(
+            includes = OptimisticLockingFailureException.class,
+            maxRetries = 10,
+            delay = 50,
+            multiplier = 2,
+            jitter = 10,
+            maxDelay = 1000
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public ReservationEntry tryCommit(String correlationId) {
+        var reservation = reservationStore.getByCorrelationId(correlationId)
                 .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.RESERVATION_NOT_FOUND));
+        if (!reservation.isCommittable()) {
+            return ReservationEntry.from(reservation);
+        }
+
+        var skuIds = reservation.getItems().stream().map(ReservationItem::getSkuId).toList();
+        var inventories = inventoryStore.getAll(skuIds).stream().collect(Collectors.toUnmodifiableMap(
+                Inventory::getSkuId,
+                Function.identity()
+        ));
+
+        reservation.commit();
+        reservation.getItems().forEach(item -> {
+            var inventory = Optional.ofNullable(inventories.get(item.getSkuId()))
+                    .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.INVENTORY_NOT_FOUND));
+            inventory.commit(item.getQuantity());
+        });
+
+        inventoryStore.saveAll(inventories.values().stream().toList());
+        reservationStore.save(reservation);
+
+        return ReservationEntry.from(reservation);
     }
 
-    private Inventory getInventory(String skuId) {
-        return inventoryStore.get(skuId)
-                .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.INVENTORY_NOT_FOUND));
+    @Retryable(
+            includes = OptimisticLockingFailureException.class,
+            maxRetries = 10,
+            delay = 100,
+            multiplier = 2,
+            jitter = 10,
+            maxDelay = 1000
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public ReservationEntry tryCancel(String correlationId) {
+        var reservation = reservationStore.getByCorrelationId(correlationId)
+                .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.RESERVATION_NOT_FOUND));
+        if (!reservation.isCancelable()) {
+            return ReservationEntry.from(reservation);
+        }
+
+        var skuIds = reservation.getItems().stream().map(ReservationItem::getSkuId).toList();
+        var inventories = inventoryStore.getAll(skuIds).stream().collect(Collectors.toUnmodifiableMap(
+                Inventory::getSkuId,
+                Function.identity()
+        ));
+
+        reservation.cancel();
+        reservation.getItems().forEach(item -> {
+            var inventory = Optional.ofNullable(inventories.get(item.getSkuId()))
+                    .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.INVENTORY_NOT_FOUND));
+            inventory.release(item.getQuantity());
+        });
+
+        inventoryStore.saveAll(inventories.values().stream().toList());
+        reservationStore.save(reservation);
+
+        return ReservationEntry.from(reservation);
     }
 }

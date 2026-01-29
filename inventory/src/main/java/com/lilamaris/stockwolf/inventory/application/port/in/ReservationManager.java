@@ -6,4 +6,8 @@ public interface ReservationManager {
             String skuId,
             int quantity
     );
+
+    ReservationEntry commit(String correlationId);
+
+    ReservationEntry cancel(String correlationId);
 }
