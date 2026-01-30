@@ -4,21 +4,15 @@ import jakarta.annotation.Nullable;
 
 public record IntrospectionResponse(
         Boolean active,
-        @Nullable Summary summary
+        @Nullable String subject,
+        @Nullable String scope,
+        @Nullable Long exp
 ) {
-    public static IntrospectionResponse active(String subject, String scope, Long expiration) {
-        var summary = new Summary(subject, scope, expiration);
-        return new IntrospectionResponse(true, summary);
+    public static IntrospectionResponse active(String subject, String scope, Long exp) {
+        return new IntrospectionResponse(true, subject, scope, exp);
     }
 
     public static IntrospectionResponse inactive() {
-        return new IntrospectionResponse(false, null);
-    }
-
-    public record Summary(
-            String subject,
-            String scope,
-            Long expiration
-    ) {
+        return new IntrospectionResponse(false, null, null, null);
     }
 }
