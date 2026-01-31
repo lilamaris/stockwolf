@@ -11,6 +11,8 @@ repositories {
 
 dependencies {
     implementation(project(":identity-client"))
+    implementation(project(":kernel"))
+
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")

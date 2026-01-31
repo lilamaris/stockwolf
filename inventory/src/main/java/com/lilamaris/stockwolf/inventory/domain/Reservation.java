@@ -1,8 +1,8 @@
 package com.lilamaris.stockwolf.inventory.domain;
 
-import com.lilamaris.stockwolf.inventory.domain.exception.DomainIllegalArgumentException;
-import com.lilamaris.stockwolf.inventory.domain.exception.DomainIllegalStateException;
-import com.lilamaris.stockwolf.inventory.domain.exception.code.ReservationErrorCode;
+import com.lilamaris.stockwolf.inventory.domain.exception.DomainErrorCode;
+import com.lilamaris.stockwolf.kernel.foundation.DomainIllegalArgumentException;
+import com.lilamaris.stockwolf.kernel.foundation.DomainIllegalStateException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -64,10 +64,10 @@ public class Reservation {
 
     public void addItem(String skuId, int quantity) {
         if (status != ReservationStatus.RESERVED) {
-            throw new DomainIllegalStateException(ReservationErrorCode.INVALID_RESERVATION_STATUS);
+            throw new DomainIllegalStateException(DomainErrorCode.INVALID_RESERVATION_STATUS);
         }
         if (quantity <= 0) {
-            throw new DomainIllegalArgumentException(ReservationErrorCode.INVALID_QUANTITY);
+            throw new DomainIllegalArgumentException(DomainErrorCode.INVALID_QUANTITY);
         }
         var item = ReservationItem.create(this, skuId, quantity);
         this.items.add(item);
@@ -99,14 +99,14 @@ public class Reservation {
 
     public void commit() {
         if (status != ReservationStatus.RESERVED) {
-            throw new DomainIllegalStateException(ReservationErrorCode.INVALID_RESERVATION_STATUS);
+            throw new DomainIllegalStateException(DomainErrorCode.INVALID_RESERVATION_STATUS);
         }
         this.status = ReservationStatus.COMMITTED;
     }
 
     public void cancel() {
         if (status == ReservationStatus.COMMITTED) {
-            throw new DomainIllegalStateException(ReservationErrorCode.INVALID_RESERVATION_STATUS);
+            throw new DomainIllegalStateException(DomainErrorCode.INVALID_RESERVATION_STATUS);
         }
         this.status = ReservationStatus.CANCELED;
     }

@@ -1,7 +1,7 @@
 package com.lilamaris.stockwolf.inventory.domain;
 
-import com.lilamaris.stockwolf.inventory.domain.exception.DomainIllegalStateException;
-import com.lilamaris.stockwolf.inventory.domain.exception.code.InventoryErrorCode;
+import com.lilamaris.stockwolf.inventory.domain.exception.DomainErrorCode;
+import com.lilamaris.stockwolf.kernel.foundation.DomainIllegalStateException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -54,21 +54,21 @@ public class Inventory {
 
     public void reserve(int quantity) {
         if (getAvailableQuantity() < quantity) {
-            throw new DomainIllegalStateException(InventoryErrorCode.INVALID_RESERVE_QUANTITY);
+            throw new DomainIllegalStateException(DomainErrorCode.INVALID_RESERVE_QUANTITY);
         }
         this.reservedQuantity += quantity;
     }
 
     public void release(int quantity) {
         if (this.reservedQuantity < quantity) {
-            throw new DomainIllegalStateException(InventoryErrorCode.INVALID_RELEASE_QUANTITY);
+            throw new DomainIllegalStateException(DomainErrorCode.INVALID_RELEASE_QUANTITY);
         }
         this.reservedQuantity -= quantity;
     }
 
     public void commit(int quantity) {
         if (this.reservedQuantity < quantity) {
-            throw new DomainIllegalStateException(InventoryErrorCode.INVALID_COMMIT_QUANTITY);
+            throw new DomainIllegalStateException(DomainErrorCode.INVALID_COMMIT_QUANTITY);
         }
         this.reservedQuantity -= quantity;
         this.totalQuantity -= quantity;
