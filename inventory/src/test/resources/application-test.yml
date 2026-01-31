@@ -16,6 +16,9 @@ spring:
       ddl-auto: create-drop
       dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  introspection:
+    enabled: false
+
 logging:
   level:
     org.hibernate.SQL: debug
