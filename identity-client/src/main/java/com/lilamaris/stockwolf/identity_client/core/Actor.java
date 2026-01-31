@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.inventory.application.port.out;
+package com.lilamaris.stockwolf.identity_client.core;
 
 import java.util.Set;
 

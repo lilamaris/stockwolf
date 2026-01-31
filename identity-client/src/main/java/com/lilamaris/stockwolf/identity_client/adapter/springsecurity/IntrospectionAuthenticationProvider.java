@@ -35,7 +35,7 @@ public class IntrospectionAuthenticationProvider implements AuthenticationProvid
 
         return new BearerTokenAuthentication(
                 token,
-                introspection,
+                introspection.subject(),
                 authorities
         );
     }
