@@ -25,7 +25,7 @@ public class IntrospectionAuthenticationProvider implements AuthenticationProvid
         String token = (String) bearer.getCredentials();
         var introspection = introspector.introspect(token);
 
-        if(!introspection.active()) {
+        if (!introspection.active()) {
             throw new BadCredentialsException("Inactive token");
         }
 
