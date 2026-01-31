@@ -1,8 +1,8 @@
 package com.lilamaris.stockwolf.identity_client;
 
 import com.lilamaris.stockwolf.identity_client.core.Introspector;
-import com.lilamaris.stockwolf.identity_client.web.IntrospectionClientProperties;
-import com.lilamaris.stockwolf.identity_client.web.IntrospectorWebClient;
+import com.lilamaris.stockwolf.identity_client.foundation.web.IntrospectionClientProperties;
+import com.lilamaris.stockwolf.identity_client.foundation.web.IntrospectorWebClient;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

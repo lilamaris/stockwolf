@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.identity_client.spring_security;
+package com.lilamaris.stockwolf.identity_client.adapter.springsecurity;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

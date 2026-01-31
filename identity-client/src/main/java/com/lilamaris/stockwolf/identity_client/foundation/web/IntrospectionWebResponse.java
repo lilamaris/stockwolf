@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.identity_client.web;
+package com.lilamaris.stockwolf.identity_client.foundation.web;
 
 import com.lilamaris.stockwolf.identity_client.core.Introspection;
 import jakarta.annotation.Nullable;

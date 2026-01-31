@@ -1,8 +1,8 @@
 package com.lilamaris.stockwolf.inventory.infrastructure.security.config;
 
 import com.lilamaris.stockwolf.identity_client.core.Introspector;
-import com.lilamaris.stockwolf.identity_client.spring_security.BearerTokenAuthenticationFilter;
-import com.lilamaris.stockwolf.identity_client.spring_security.IntrospectionAuthenticationProvider;
+import com.lilamaris.stockwolf.identity_client.adapter.springsecurity.BearerTokenAuthenticationFilter;
+import com.lilamaris.stockwolf.identity_client.adapter.springsecurity.IntrospectionAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

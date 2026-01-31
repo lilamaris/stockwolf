@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.identity_client.spring_security;
+package com.lilamaris.stockwolf.identity_client.adapter.springsecurity;
 
 import com.lilamaris.stockwolf.identity_client.core.Introspection;
 import org.jspecify.annotations.Nullable;

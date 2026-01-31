@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.identity_client.spring_security;
+package com.lilamaris.stockwolf.identity_client.adapter.springsecurity;
 
 import com.lilamaris.stockwolf.identity_client.core.Introspector;
 import lombok.RequiredArgsConstructor;
