@@ -1,20 +1,20 @@
 package com.lilamaris.stockwolf.inventory.application.service;
 
-import com.lilamaris.stockwolf.inventory.application.exception.ApplicationErrorCode;
-import com.lilamaris.stockwolf.inventory.application.exception.ApplicationResourceNotFoundException;
+import com.lilamaris.stockwolf.idempotency.core.IdempotencyExecutor;
+import com.lilamaris.stockwolf.idempotency.foundation.MappedIdempotencyContext;
+import com.lilamaris.stockwolf.idempotency.foundation.MappedIdempotencyKey;
 import com.lilamaris.stockwolf.inventory.application.port.in.ReservationEntry;
 import com.lilamaris.stockwolf.inventory.application.port.in.ReservationManager;
-import com.lilamaris.stockwolf.inventory.application.port.out.ReservationStore;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class InventoryService implements
         ReservationManager {
-    private final ReservationStore reservationStore;
     private final TxService tx;
+
+    private final IdempotencyExecutor idempotencyExecutor;
 
     @Override
     public ReservationEntry reserve(
@@ -22,34 +22,40 @@ public class InventoryService implements
             String skuId,
             int quantity
     ) {
-        try {
-            return tx.tryReserve(correlationId, skuId, quantity);
-        } catch (DataIntegrityViolationException e) {
-            var reservation = reservationStore.getByCorrelationId(correlationId)
-                    .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.RESERVATION_NOT_FOUND));
-            return ReservationEntry.from(reservation);
-        }
+        var idemKey = new MappedIdempotencyKey(correlationId, "reserve");
+        var idemCtx = MappedIdempotencyContext.from(skuId, quantity);
+        var execute = idempotencyExecutor.execute(
+                idemKey,
+                idemCtx,
+                () -> tx.tryReserve(correlationId, skuId, quantity),
+                ReservationEntry.class
+        );
+        return execute.result();
     }
 
     @Override
     public ReservationEntry commit(String correlationId) {
-        try {
-            return tx.tryCommit(correlationId);
-        } catch (DataIntegrityViolationException e) {
-            var reservation = reservationStore.getByCorrelationId(correlationId)
-                    .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.RESERVATION_NOT_FOUND));
-            return ReservationEntry.from(reservation);
-        }
+        var idemKey = new MappedIdempotencyKey(correlationId, "commit");
+        var idemCtx = MappedIdempotencyContext.noContext();
+        var execute = idempotencyExecutor.execute(
+                idemKey,
+                idemCtx,
+                () -> tx.tryCommit(correlationId),
+                ReservationEntry.class
+        );
+        return execute.result();
     }
 
     @Override
     public ReservationEntry cancel(String correlationId) {
-        try {
-            return tx.tryCancel(correlationId);
-        } catch (DataIntegrityViolationException e) {
-            var reservation = reservationStore.getByCorrelationId(correlationId)
-                    .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.RESERVATION_NOT_FOUND));
-            return ReservationEntry.from(reservation);
-        }
+        var idemKey = new MappedIdempotencyKey(correlationId, "cancel");
+        var idemCtx = MappedIdempotencyContext.noContext();
+        var execute = idempotencyExecutor.execute(
+                idemKey,
+                idemCtx,
+                () -> tx.tryCancel(correlationId),
+                ReservationEntry.class
+        );
+        return execute.result();
     }
 }

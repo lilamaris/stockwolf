@@ -25,3 +25,9 @@ spring:
     server:
       baseUrl: http://${INTROSPECTION_HOST}:${INTROSPECTION_PORT}
     api: ${INTROSPECTION_API}
+
+  idempotency:
+    execution-ttl: 30s
+    cache:
+      key-prefix: idem
+      ttl: 1h

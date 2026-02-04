@@ -8,12 +8,8 @@ import com.lilamaris.stockwolf.inventory.application.port.out.ReservationStore;
 import com.lilamaris.stockwolf.inventory.domain.Inventory;
 import com.lilamaris.stockwolf.inventory.domain.Reservation;
 import com.lilamaris.stockwolf.inventory.domain.ReservationItem;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -27,17 +23,7 @@ public class TxService {
     private final InventoryStore inventoryStore;
     private final ReservationStore reservationStore;
 
-    private final EntityManager em;
-
-    @Retryable(
-            includes = OptimisticLockingFailureException.class,
-            maxRetries = 10,
-            delay = 50,
-            multiplier = 2,
-            jitter = 10,
-            maxDelay = 1000
-    )
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public ReservationEntry tryReserve(
             String correlationId,
             String skuId,
@@ -55,15 +41,7 @@ public class TxService {
         return ReservationEntry.from(reservation);
     }
 
-    @Retryable(
-            includes = OptimisticLockingFailureException.class,
-            maxRetries = 10,
-            delay = 50,
-            multiplier = 2,
-            jitter = 10,
-            maxDelay = 1000
-    )
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public ReservationEntry tryCommit(String correlationId) {
         var reservation = reservationStore.getByCorrelationId(correlationId)
                 .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.RESERVATION_NOT_FOUND));
@@ -90,15 +68,7 @@ public class TxService {
         return ReservationEntry.from(reservation);
     }
 
-    @Retryable(
-            includes = OptimisticLockingFailureException.class,
-            maxRetries = 10,
-            delay = 100,
-            multiplier = 2,
-            jitter = 10,
-            maxDelay = 1000
-    )
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public ReservationEntry tryCancel(String correlationId) {
         var reservation = reservationStore.getByCorrelationId(correlationId)
                 .orElseThrow(() -> new ApplicationResourceNotFoundException(ApplicationErrorCode.RESERVATION_NOT_FOUND));
