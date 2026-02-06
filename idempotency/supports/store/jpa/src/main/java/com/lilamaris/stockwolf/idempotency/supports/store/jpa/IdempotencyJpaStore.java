@@ -2,29 +2,34 @@ package com.lilamaris.stockwolf.idempotency.supports.store.jpa;
 
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyContext;
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyKey;
-import com.lilamaris.stockwolf.idempotency.core.IdempotencyProcessingResult;
+import com.lilamaris.stockwolf.idempotency.core.Idempotent;
 import com.lilamaris.stockwolf.idempotency.core.store.IdempotencyStore;
 import com.lilamaris.stockwolf.idempotency.foundation.store.IdempotencyProgressStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public class IdempotencyJpaStore implements IdempotencyStore {
     private final IdempotencyRepository repository;
+    private final ObjectMapper mapper;
 
     public IdempotencyJpaStore(
-            IdempotencyRepository repository
+            IdempotencyRepository repository,
+            ObjectMapper mapper
     ) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public IdempotencyProcessingResult ensureExistAndGet(
+    public Idempotent ensureExistAndGet(
             IdempotencyKey key
     ) {
         var idemKey = getIdempotencyKey(key);
@@ -41,6 +46,12 @@ public class IdempotencyJpaStore implements IdempotencyStore {
     }
 
     @Override
+    public <T> Optional<T> resolveResult(Idempotent idempotent, Class<T> expect) {
+        return idempotent.rawResult()
+                .map(o -> mapper.convertValue(o, expect));
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean progress(IdempotencyKey key, IdempotencyContext context) {
         var idemKey = getIdempotencyKey(key);
@@ -49,7 +60,7 @@ public class IdempotencyJpaStore implements IdempotencyStore {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public boolean complete(IdempotencyKey key, String result) {
+    public boolean complete(IdempotencyKey key, Object result) {
         var idemKey = getIdempotencyKey(key);
         return repository.moveToComplete(idemKey, result) == 1;
     }

@@ -1,12 +1,13 @@
 package com.lilamaris.stockwolf.idempotency.foundation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyContext;
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyExecutor;
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyKey;
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyResult;
-import com.lilamaris.stockwolf.idempotency.core.exception.*;
+import com.lilamaris.stockwolf.idempotency.core.exception.IdempotencyContextConflictException;
+import com.lilamaris.stockwolf.idempotency.core.exception.IdempotencyExecutionFailedException;
+import com.lilamaris.stockwolf.idempotency.core.exception.IdempotencyPendingException;
+import com.lilamaris.stockwolf.idempotency.core.exception.IdempotencyProcessingFailedException;
 import com.lilamaris.stockwolf.idempotency.core.store.IdempotencyCache;
 import com.lilamaris.stockwolf.idempotency.core.store.IdempotencyCacheKeyBuilder;
 import com.lilamaris.stockwolf.idempotency.core.store.IdempotencyStore;
@@ -25,22 +26,19 @@ public class DefaultIdempotencyExecutor implements IdempotencyExecutor {
     private final IdempotencyCacheKeyBuilder cacheKeyBuilder;
     private final Duration cacheTtl;
     private final Duration executionTtl;
-    private final ObjectMapper mapper;
 
     public DefaultIdempotencyExecutor(
             IdempotencyStore store,
             IdempotencyCache idempotencyCache,
             IdempotencyCacheKeyBuilder cacheKeyBuilder,
             Duration cacheTtl,
-            Duration executionTtl,
-            ObjectMapper mapper
+            Duration executionTtl
     ) {
         this.store = store;
         this.cache = idempotencyCache;
         this.cacheKeyBuilder = cacheKeyBuilder;
         this.cacheTtl = cacheTtl;
         this.executionTtl = executionTtl;
-        this.mapper = mapper;
     }
 
     @Retryable(
@@ -56,38 +54,37 @@ public class DefaultIdempotencyExecutor implements IdempotencyExecutor {
             IdempotencyKey key,
             IdempotencyContext context,
             Supplier<T> action,
-            Class<T> expectReturnType
+            Class<T> expect
     ) {
         var cacheKey = cacheKeyBuilder.buildKey(key, context);
-        var cachedResult = cache.get(cacheKey);
+        var cached = cache.get(cacheKey, expect);
 
-        if (cachedResult != null) return new IdempotencyResult.Cached<>(expectReturnType.cast(cachedResult));
+        if (cached != null) return new IdempotencyResult.Cached<>(cached);
 
-        var processingResult = store.ensureExistAndGet(key);
+        var entry = store.ensureExistAndGet(key);
 
-        if (processingResult.isFail()) {
-            String failReason = processingResult.failReason().orElseThrow(() -> new IdempotencyProcessingFailedException(String.format(
+        if (entry.isFail()) {
+            String failReason = entry.failReason().orElseThrow(() -> new IdempotencyProcessingFailedException(String.format(
                     "Idempotency key '%s' is already report failed. but fail reason not commented.", key
             )));
             throw new IdempotencyExecutionFailedException(failReason);
         }
 
-        if (processingResult.isComplete()) {
-            String stringifyResult = processingResult.stringifyResult().orElseThrow(() -> new IdempotencyProcessingFailedException(String.format(
+        if (entry.isComplete()) {
+            T result = store.resolveResult(entry, expect).orElseThrow(() -> new IdempotencyProcessingFailedException(String.format(
                     "Idempotency key '%s' is already completed. but execution result not exists.", key
             )));
-            T result = materialize(stringifyResult, expectReturnType);
             cache.put(cacheKey, result, cacheTtl);
             return new IdempotencyResult.Cached<>(result);
         }
 
-        if (processingResult.isProgress()) {
-            var processingContext = processingResult.context().orElseThrow(() -> new IdempotencyProcessingFailedException(String.format(
+        if (entry.isProgress()) {
+            var processingContext = entry.context().orElseThrow(() -> new IdempotencyProcessingFailedException(String.format(
                     "Idempotency key '%s' is currently progressing. but execution context not exists.", key
             )));
             if (!context.match(processingContext)) throw new IdempotencyContextConflictException();
 
-            var progressAt = processingResult.progressAt();
+            var progressAt = entry.progressAt();
             var timeoutAt = progressAt.plus(executionTtl);
             if (Instant.now().isAfter(timeoutAt)) {
                 store.retryable(key);
@@ -95,7 +92,7 @@ public class DefaultIdempotencyExecutor implements IdempotencyExecutor {
             throw new IdempotencyPendingException();
         }
 
-        if (processingResult.isReady() || processingResult.isRetryable()) {
+        if (entry.isReady() || entry.isRetryable()) {
             boolean acquired = store.progress(key, context);
             if (!acquired) {
                 throw new IdempotencyPendingException();
@@ -103,7 +100,7 @@ public class DefaultIdempotencyExecutor implements IdempotencyExecutor {
 
             try {
                 T result = action.get();
-                store.complete(key, stringify(result));
+                store.complete(key, result);
                 cache.put(cacheKey, result, cacheTtl);
                 return new IdempotencyResult.Executed<>(result);
             } catch (Exception e) {
@@ -112,23 +109,5 @@ public class DefaultIdempotencyExecutor implements IdempotencyExecutor {
             }
         }
         throw new IllegalStateException("Unknown status");
-    }
-
-    private <T> T materialize(String stringifyResult, Class<T> expectResultType) {
-        try {
-            return mapper.readValue(stringifyResult, expectResultType);
-        } catch (JsonProcessingException e) {
-            log.error("Idempotency executor throw error while materialize stringify stringifyResult: ", e);
-            throw new IdempotencyException("Stringify stringifyResult materialize failed.");
-        }
-    }
-
-    private String stringify(Object result) {
-        try {
-            return mapper.writeValueAsString(result);
-        } catch (JsonProcessingException e) {
-            log.error("Idempotency executor throw error while stringify stringifyResult: ", e);
-            throw new IdempotencyException("Result stringify failed.");
-        }
     }
 }

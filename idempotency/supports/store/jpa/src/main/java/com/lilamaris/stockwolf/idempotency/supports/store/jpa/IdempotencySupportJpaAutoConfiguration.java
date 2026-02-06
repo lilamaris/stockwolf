@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.JpaRepository;
+import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
 @AutoConfigureAfter(DataJpaRepositoriesAutoConfiguration.class)
@@ -17,8 +18,9 @@ public class IdempotencySupportJpaAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(IdempotencyStore.class)
     IdempotencyStore idempotencyJpaStore(
-            IdempotencyRepository repository
+            IdempotencyRepository repository,
+            ObjectMapper mapper
     ) {
-        return new IdempotencyJpaStore(repository);
+        return new IdempotencyJpaStore(repository, mapper);
     }
 }

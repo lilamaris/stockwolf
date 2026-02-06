@@ -2,12 +2,16 @@ package com.lilamaris.stockwolf.idempotency.core.store;
 
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyContext;
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyKey;
-import com.lilamaris.stockwolf.idempotency.core.IdempotencyProcessingResult;
+import com.lilamaris.stockwolf.idempotency.core.Idempotent;
+
+import java.util.Optional;
 
 public interface IdempotencyStore {
-    IdempotencyProcessingResult ensureExistAndGet(IdempotencyKey key);
+    Idempotent ensureExistAndGet(IdempotencyKey key);
 
-    boolean complete(IdempotencyKey key, String result);
+    <T> Optional<T> resolveResult(Idempotent idempotent, Class<T> expect);
+
+    boolean complete(IdempotencyKey key, Object result);
 
     boolean progress(IdempotencyKey key, IdempotencyContext context);
 

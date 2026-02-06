@@ -20,7 +20,7 @@ public interface IdempotencyRepository extends JpaRepository<IdempotencyEntry, U
 
     @Modifying
     @Query(value = """
-            INSERT INTO idempotency_entry (id, key, subject, op, hash, stringify_result, status)
+            INSERT INTO idempotency_entry (id, key, subject, op, hash, result, status)
             VALUES (:id, :key, :subject, :op, NULL, NULL, :status)
             ON CONFLICT (key) DO NOTHING
             """, nativeQuery = true)
@@ -41,12 +41,12 @@ public interface IdempotencyRepository extends JpaRepository<IdempotencyEntry, U
     @Modifying
     @Query("""
             UPDATE IdempotencyEntry i
-            SET i.status = 'COMPLETE', stringifyResult = :stringifyResult
+            SET i.status = 'COMPLETE', result = :result
             WHERE i.key = :key
                 AND i.status = 'IN_PROGRESS'""")
     int moveToComplete(
             @Param("key") String key,
-            @Param("stringifyResult") String result
+            @Param("result") Object result
     );
 
     @Modifying

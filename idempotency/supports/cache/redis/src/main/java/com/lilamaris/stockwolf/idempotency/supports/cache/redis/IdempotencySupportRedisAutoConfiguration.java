@@ -33,8 +33,9 @@ public class IdempotencySupportRedisAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(IdempotencyCache.class)
     IdempotencyCache idempotencyRedisCache(
-            RedisTemplate<String, Object> redisTemplate
+            RedisTemplate<String, Object> redisTemplate,
+            ObjectMapper mapper
     ) {
-        return new IdempotencyRedisCache(redisTemplate);
+        return new IdempotencyRedisCache(redisTemplate, mapper);
     }
 }

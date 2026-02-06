@@ -1,8 +1,5 @@
 package com.lilamaris.stockwolf.idempotency;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyExecutor;
 import com.lilamaris.stockwolf.idempotency.core.store.IdempotencyCache;
 import com.lilamaris.stockwolf.idempotency.core.store.IdempotencyCacheKeyBuilder;
@@ -35,18 +32,6 @@ import java.util.Optional;
 public class IdempotencyAutoConfiguration {
     private static final Logger log = LoggerFactory.getLogger(IdempotencyAutoConfiguration.class);
 
-    @Bean
-    @ConditionalOnMissingBean(ObjectMapper.class)
-    ObjectMapper objectMapper() {
-        var mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.activateDefaultTyping(
-                mapper.getPolymorphicTypeValidator(),
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY
-        );
-        return mapper;
-    }
 
     @Bean
     @ConditionalOnMissingBean(IdempotencyCache.class)
@@ -68,7 +53,6 @@ public class IdempotencyAutoConfiguration {
             IdempotencyStore store,
             IdempotencyCache idempotencyCache,
             IdempotencyCacheKeyBuilder idempotencyCacheKeyBuilder,
-            ObjectMapper mapper,
             IdempotencyProperties properties
     ) {
         if (idempotencyCache instanceof NoOpIdempotencyCache) {
@@ -85,8 +69,7 @@ public class IdempotencyAutoConfiguration {
                 idempotencyCache,
                 idempotencyCacheKeyBuilder,
                 cacheTtl,
-                pendingTimeout,
-                mapper
+                pendingTimeout
         );
     }
 }

@@ -6,7 +6,7 @@ import java.time.Duration;
 
 public class NoOpIdempotencyCache implements IdempotencyCache {
     @Override
-    public Object get(String key) {
+    public <T> T get(String key, Class<T> expect) {
         return null;
     }
 

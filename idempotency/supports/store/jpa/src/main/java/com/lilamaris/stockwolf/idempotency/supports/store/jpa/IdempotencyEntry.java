@@ -1,7 +1,7 @@
 package com.lilamaris.stockwolf.idempotency.supports.store.jpa;
 
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyContext;
-import com.lilamaris.stockwolf.idempotency.core.IdempotencyProcessingResult;
+import com.lilamaris.stockwolf.idempotency.core.Idempotent;
 import com.lilamaris.stockwolf.idempotency.foundation.MappedIdempotencyContext;
 import com.lilamaris.stockwolf.idempotency.foundation.store.IdempotencyProgressStatus;
 import jakarta.persistence.*;
@@ -15,7 +15,7 @@ import java.util.UUID;
         name = "idempotency_entry",
         uniqueConstraints = @UniqueConstraint(columnNames = "key")
 )
-public class IdempotencyEntry implements IdempotencyProcessingResult {
+public class IdempotencyEntry implements Idempotent {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -35,7 +35,9 @@ public class IdempotencyEntry implements IdempotencyProcessingResult {
     @Enumerated(EnumType.STRING)
     private IdempotencyProgressStatus status;
 
-    private String stringifyResult;
+    @Convert(converter = JsonConverter.class)
+    @Column(columnDefinition = "text")
+    private Object result;
 
     protected IdempotencyEntry() {
     }
@@ -47,13 +49,13 @@ public class IdempotencyEntry implements IdempotencyProcessingResult {
     }
 
     @Override
-    public Optional<String> failReason() {
-        return Optional.ofNullable(failReason);
+    public Optional<Object> rawResult() {
+        return Optional.ofNullable(result);
     }
 
     @Override
-    public Optional<String> stringifyResult() {
-        return Optional.ofNullable(stringifyResult);
+    public Optional<String> failReason() {
+        return Optional.ofNullable(failReason);
     }
 
     @Override

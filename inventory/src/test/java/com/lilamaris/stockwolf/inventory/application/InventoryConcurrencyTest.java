@@ -16,6 +16,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -28,13 +29,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class InventoryConcurrencyTest {
     private static final Logger log = LoggerFactory.getLogger(InventoryConcurrencyTest.class);
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-            "postgres:18-alpine"
-    )
-            .withDatabaseName("inventory_test")
-            .withUsername("test_user")
-            .withPassword("test_password");
+
+    private static final PostgreSQLContainer<?> postgres;
+    private static final GenericContainer redis;
+
+    static {
+        postgres = new PostgreSQLContainer<>("postgres:18-alpine")
+                .withDatabaseName("inventory_test")
+                .withUsername("test_user")
+                .withPassword("test_password");
+        postgres.start();
+
+        redis = new GenericContainer("redis:7.0.8-alpine")
+                .withExposedPorts(6379)
+                .withReuse(true);
+        redis.start();
+    }
+
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port",  () -> redis.getMappedPort(6379));
+    }
+
     static SequentialIdentifyGenerator skuIdGenerator = new SequentialIdentifyGenerator("SKU");
     static SequentialIdentifyGenerator correlationIdGenerator = new SequentialIdentifyGenerator("ORDER");
     @Autowired
@@ -45,13 +65,6 @@ public class InventoryConcurrencyTest {
     ReservationStore reservationStore;
 
     int threadCount;
-
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
 
     @BeforeEach
     void run() {
@@ -76,16 +89,22 @@ public class InventoryConcurrencyTest {
         var result = tester.run();
         tester.summary(result);
         var expectedReservationCount = initialQty / rsvQty;
-        tester.assertExactSuccess(result, expectedReservationCount);
 
         Inventory inventory = inventoryStore.get(skuId).orElseThrow();
         assertThat(inventory.getReservedQuantity())
                 .as("예약 걸린 개수")
                 .isEqualTo(initialQty);
-
+        assertThat(inventory.getTotalQuantity())
+                .as("전체 개수(예약 + 잔여)")
+                .isEqualTo(initialQty);
+        assertThat(inventory.getAvailableQuantity())
+                .as("가용 개수")
+                .isZero();
         assertThat(result.successResult().size())
                 .as("생성된 예약 개수")
                 .isEqualTo(expectedReservationCount);
+
+        tester.assertExactSuccess(result, expectedReservationCount);
     }
 
     @Test
@@ -107,12 +126,13 @@ public class InventoryConcurrencyTest {
         // then
         var result = tester.run();
         tester.summary(result);
-        tester.assertAllSuccess(result);
 
         Inventory inventory = inventoryStore.get(skuId).get();
         assertThat(inventory.getReservedQuantity())
                 .as("예약 걸린 개수")
                 .isEqualTo(1);
+
+        tester.assertAllSuccess(result);
     }
 
     @Test
@@ -134,11 +154,16 @@ public class InventoryConcurrencyTest {
         // then
         var result = tester.run();
         tester.summary(result);
-        tester.assertAllSuccess(result);
 
         var inventory = inventoryStore.get(skuId).get();
-        assertThat(inventory.getReservedQuantity()).isZero();
-        assertThat(inventory.getTotalQuantity()).isEqualTo(initialQty - 1);
+        assertThat(inventory.getReservedQuantity())
+                .as("예약 걸린 개수")
+                .isZero();
+        assertThat(inventory.getAvailableQuantity())
+                .as("가용 개수")
+                .isEqualTo(initialQty - 1);
+
+        tester.assertAllSuccess(result);
     }
 
     @Test
@@ -159,11 +184,16 @@ public class InventoryConcurrencyTest {
         // then
         var result = tester.run();
         tester.summary(result);
-        tester.assertAllSuccess(result);
 
         var inventory = inventoryStore.get(skuId).get();
-        assertThat(inventory.getReservedQuantity()).isZero();
-        assertThat(inventory.getTotalQuantity()).isEqualTo(initialQty);
+        assertThat(inventory.getReservedQuantity())
+                .as("예약 걸린 개수")
+                .isZero();
+        assertThat(inventory.getTotalQuantity())
+                .as("전체 개수(예약 + 잔여)")
+                .isEqualTo(initialQty);
+
+        tester.assertAllSuccess(result);
     }
 
     private String initializeInventory(int initialQty, int initialReservedQty) {

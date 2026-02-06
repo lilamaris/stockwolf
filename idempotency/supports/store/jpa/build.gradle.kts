@@ -8,6 +8,7 @@ repositories {
 dependencies {
     implementation(project(":idempotency:core"))
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("tools.jackson.core:jackson-databind")
 }
 
 tasks.test {

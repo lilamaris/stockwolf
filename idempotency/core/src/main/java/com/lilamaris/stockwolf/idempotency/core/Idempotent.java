@@ -5,10 +5,10 @@ import com.lilamaris.stockwolf.idempotency.foundation.store.IdempotencyProgressS
 import java.time.Instant;
 import java.util.Optional;
 
-public interface IdempotencyProcessingResult {
+public interface Idempotent {
     Optional<IdempotencyContext> context();
 
-    Optional<String> stringifyResult();
+    Optional<Object> rawResult();
 
     Optional<String> failReason();
 

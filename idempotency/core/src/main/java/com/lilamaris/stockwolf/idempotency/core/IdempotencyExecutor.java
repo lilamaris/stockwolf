@@ -7,6 +7,6 @@ public interface IdempotencyExecutor {
             IdempotencyKey key,
             IdempotencyContext context,
             Supplier<T> action,
-            Class<T> expectReturnType
+            Class<T> expect
     );
 }
