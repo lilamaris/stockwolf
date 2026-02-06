@@ -1,8 +1,10 @@
 package com.lilamaris.stockwolf.idempotency.supports.store.jpa;
 
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyContext;
+import com.lilamaris.stockwolf.idempotency.core.IdempotencyKey;
 import com.lilamaris.stockwolf.idempotency.core.Idempotent;
 import com.lilamaris.stockwolf.idempotency.foundation.MappedIdempotencyContext;
+import com.lilamaris.stockwolf.idempotency.foundation.MappedIdempotencyKey;
 import com.lilamaris.stockwolf.idempotency.foundation.store.IdempotencyProgressStatus;
 import jakarta.persistence.*;
 
@@ -40,6 +42,11 @@ public class IdempotencyEntry implements Idempotent {
     private Object result;
 
     protected IdempotencyEntry() {
+    }
+
+    @Override
+    public IdempotencyKey key() {
+        return new MappedIdempotencyKey(subject, op);
     }
 
     @Override

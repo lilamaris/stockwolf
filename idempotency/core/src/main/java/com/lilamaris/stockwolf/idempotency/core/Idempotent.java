@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.util.Optional;
 
 public interface Idempotent {
+    IdempotencyKey key();
+
     Optional<IdempotencyContext> context();
 
     Optional<Object> rawResult();
