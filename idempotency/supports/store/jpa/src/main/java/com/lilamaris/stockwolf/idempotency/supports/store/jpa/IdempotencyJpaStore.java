@@ -1,11 +1,10 @@
-package com.lilamaris.stockwolf.inventory.infrastructure.idempotency;
+package com.lilamaris.stockwolf.idempotency.supports.store.jpa;
 
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyContext;
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyKey;
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyProcessingResult;
 import com.lilamaris.stockwolf.idempotency.core.store.IdempotencyStore;
 import com.lilamaris.stockwolf.idempotency.foundation.store.IdempotencyProgressStatus;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,9 +13,14 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Repository
-@RequiredArgsConstructor
 public class IdempotencyJpaStore implements IdempotencyStore {
     private final IdempotencyRepository repository;
+
+    public IdempotencyJpaStore(
+            IdempotencyRepository repository
+    ) {
+        this.repository = repository;
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)

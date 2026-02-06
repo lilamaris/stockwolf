@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.inventory;
+package com.lilamaris.stockwolf;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

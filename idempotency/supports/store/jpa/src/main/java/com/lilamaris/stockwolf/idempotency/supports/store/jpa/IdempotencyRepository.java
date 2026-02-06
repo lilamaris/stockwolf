@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.inventory.infrastructure.idempotency;
+package com.lilamaris.stockwolf.idempotency.supports.store.jpa;
 
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyKey;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,17 +10,17 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface IdempotencyRepository extends JpaRepository<Idempotency, UUID> {
+public interface IdempotencyRepository extends JpaRepository<IdempotencyEntry, UUID> {
     @Query("""
             SELECT i
-            FROM Idempotency i
+            FROM IdempotencyEntry i
             WHERE i.subject = :subject
                 AND i.op = :op""")
-    Optional<Idempotency> findBySubjectAndOp(String subject, String op);
+    Optional<IdempotencyEntry> findBySubjectAndOp(String subject, String op);
 
     @Modifying
     @Query(value = """
-            INSERT INTO idempotency (id, key, subject, op, command_hash, stringify_result, status)
+            INSERT INTO idempotency_entry (id, key, subject, op, hash, stringify_result, status)
             VALUES (:id, :key, :subject, :op, NULL, NULL, :status)
             ON CONFLICT (key) DO NOTHING
             """, nativeQuery = true)
@@ -28,8 +28,8 @@ public interface IdempotencyRepository extends JpaRepository<Idempotency, UUID> 
 
     @Modifying
     @Query("""
-            UPDATE Idempotency i
-            SET i.status = 'IN_PROGRESS', i.commandHash = :hash, i.progressAt = :now
+            UPDATE IdempotencyEntry i
+            SET i.status = 'IN_PROGRESS', i.hash = :hash, i.progressAt = :now
             WHERE i.key = :key
                 AND i.status = 'READY'""")
     int moveToProgress(
@@ -40,7 +40,7 @@ public interface IdempotencyRepository extends JpaRepository<Idempotency, UUID> 
 
     @Modifying
     @Query("""
-            UPDATE Idempotency i
+            UPDATE IdempotencyEntry i
             SET i.status = 'COMPLETE', stringifyResult = :stringifyResult
             WHERE i.key = :key
                 AND i.status = 'IN_PROGRESS'""")
@@ -51,7 +51,7 @@ public interface IdempotencyRepository extends JpaRepository<Idempotency, UUID> 
 
     @Modifying
     @Query("""
-            UPDATE Idempotency i
+            UPDATE IdempotencyEntry i
             SET i.status = 'FAIL'
             WHERE i.key = :key
                 AND i.status = 'IN_PROGRESS'""")
@@ -61,7 +61,7 @@ public interface IdempotencyRepository extends JpaRepository<Idempotency, UUID> 
 
     @Modifying
     @Query("""
-            UPDATE Idempotency i
+            UPDATE IdempotencyEntry i
             SET i.status = 'RETRYABLE'
             WHERE i.key = :key
                 AND i.status = 'IN_PROGRESS'""")
@@ -69,7 +69,7 @@ public interface IdempotencyRepository extends JpaRepository<Idempotency, UUID> 
             @Param("key") String key
     );
 
-    default Optional<Idempotency> findByIdempotencyKey(IdempotencyKey key) {
+    default Optional<IdempotencyEntry> findByIdempotencyKey(IdempotencyKey key) {
         return findBySubjectAndOp(key.subject(), key.op());
     }
 }

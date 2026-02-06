@@ -10,11 +10,15 @@ import com.lilamaris.stockwolf.idempotency.core.store.IdempotencyStore;
 import com.lilamaris.stockwolf.idempotency.foundation.DefaultIdempotencyExecutor;
 import com.lilamaris.stockwolf.idempotency.foundation.store.NoOpIdempotencyCache;
 import com.lilamaris.stockwolf.idempotency.foundation.store.PrefixedIdempotencyCacheKeyBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -27,7 +31,10 @@ import java.util.Optional;
         matchIfMissing = true
 )
 @EnableConfigurationProperties(IdempotencyProperties.class)
+@AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class IdempotencyAutoConfiguration {
+    private static final Logger log = LoggerFactory.getLogger(IdempotencyAutoConfiguration.class);
+
     @Bean
     @ConditionalOnMissingBean(ObjectMapper.class)
     ObjectMapper objectMapper() {
@@ -64,6 +71,9 @@ public class IdempotencyAutoConfiguration {
             ObjectMapper mapper,
             IdempotencyProperties properties
     ) {
+        if (idempotencyCache instanceof NoOpIdempotencyCache) {
+            log.warn("!!! NO AVAILABLE CACHE STORE !!!");
+        }
         Duration cacheTtl = Optional.ofNullable(properties.cache().ttl())
                 .orElseGet(() -> Duration.ofHours(24));
 

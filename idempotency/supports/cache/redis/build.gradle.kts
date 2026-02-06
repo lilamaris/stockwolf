@@ -6,10 +6,9 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation(project(":idempotency:core"))
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.20.1")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("tools.jackson.core:jackson-databind")
 }
 
 tasks.test {

@@ -11,7 +11,9 @@ repositories {
 
 dependencies {
     implementation(project(":identity-client"))
-    implementation(project(":idempotency"))
+    implementation(project(":idempotency:core"))
+    implementation(project(":idempotency:supports:store:jpa"))
+    implementation(project(":idempotency:supports:cache:redis"))
     implementation(project(":kernel"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

@@ -1,14 +1,10 @@
-package com.lilamaris.stockwolf.inventory.infrastructure.idempotency;
+package com.lilamaris.stockwolf.idempotency.supports.store.jpa;
 
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyContext;
 import com.lilamaris.stockwolf.idempotency.core.IdempotencyProcessingResult;
 import com.lilamaris.stockwolf.idempotency.foundation.MappedIdempotencyContext;
 import com.lilamaris.stockwolf.idempotency.foundation.store.IdempotencyProgressStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -16,12 +12,10 @@ import java.util.UUID;
 
 @Entity
 @Table(
-        name = "idempotency",
+        name = "idempotency_entry",
         uniqueConstraints = @UniqueConstraint(columnNames = "key")
 )
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Idempotency implements IdempotencyProcessingResult {
+public class IdempotencyEntry implements IdempotencyProcessingResult {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -32,7 +26,7 @@ public class Idempotency implements IdempotencyProcessingResult {
 
     private String op;
 
-    private String commandHash;
+    private String hash;
 
     private Instant progressAt;
 
@@ -41,12 +35,14 @@ public class Idempotency implements IdempotencyProcessingResult {
     @Enumerated(EnumType.STRING)
     private IdempotencyProgressStatus status;
 
-    @Setter
     private String stringifyResult;
+
+    protected IdempotencyEntry() {
+    }
 
     @Override
     public Optional<IdempotencyContext> context() {
-        return Optional.ofNullable(commandHash)
+        return Optional.ofNullable(hash)
                 .map(MappedIdempotencyContext::new);
     }
 
