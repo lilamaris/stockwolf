@@ -16,6 +16,8 @@ dependencies {
     implementation(project(":idempotency:supports:cache:redis"))
     implementation(project(":kernel"))
 
+    implementation(project(":inventory:contract"))
+
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")

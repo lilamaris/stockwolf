@@ -4,8 +4,8 @@ Identity Service는 Stockwolf 시스템에서
 요청 주체(사용자 또는 서비스)의 정체성(Identity)를 인증(Authentication)하고,
 그 결과를 다른 마이크로 서비스가 신뢰할 수 있도록 제공하는 서비스이다.
 
-
 ## 특징
+
 - JWT 발급 및 검증에 대한 책임을 가진다.
 - 인증 결과는 `RS256`으로 서명된 JWT로 표현한다.
 - 공개 키는 `JWKS(JSON Web Key Set)`으로 노출함.
@@ -14,7 +14,7 @@ Identity Service는 Stockwolf 시스템에서
 
 - 사용자 회원 가입 및 인증 정보 관리
 - 사용자 로그인 처리
-- 로그인 및 회원가입 성공 시 JWT(Access Token) 발급 
+- 로그인 및 회원가입 성공 시 JWT(Access Token) 발급
 - 토큰 검증을 위한 `JWKS(JSON Web Key Set)` 공개
 - 각 마이크로 서비스 요청에 대한 Token Introspection 제공
 
@@ -59,6 +59,7 @@ Response
 `POST /auth/introspect`
 
 **Request Body**
+
 ```json
 {
   "token": "eyJraWQiOiI1..."
@@ -68,6 +69,7 @@ Response
 **Response**
 
 if token valid
+
 ```json
 {
   "active": true,
@@ -78,6 +80,7 @@ if token valid
 ```
 
 else
+
 ```json
 {
   "active": false

@@ -12,5 +12,8 @@ include("event:supports:jpa")
 include("identity")
 include("identity-client")
 
-include("inventory")
-include("payment")
+include("inventory:application")
+include("inventory:contract")
+
+include("payment:application")
+include("payment:contract")

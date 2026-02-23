@@ -18,7 +18,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,6 +31,8 @@ public class InventoryConcurrencyTest {
 
     private static final PostgreSQLContainer<?> postgres;
     private static final GenericContainer redis;
+    static SequentialIdentifyGenerator skuIdGenerator = new SequentialIdentifyGenerator("SKU");
+    static SequentialIdentifyGenerator correlationIdGenerator = new SequentialIdentifyGenerator("ORDER");
 
     static {
         postgres = new PostgreSQLContainer<>("postgres:18-alpine")
@@ -46,25 +47,22 @@ public class InventoryConcurrencyTest {
         redis.start();
     }
 
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port",  () -> redis.getMappedPort(6379));
-    }
-
-    static SequentialIdentifyGenerator skuIdGenerator = new SequentialIdentifyGenerator("SKU");
-    static SequentialIdentifyGenerator correlationIdGenerator = new SequentialIdentifyGenerator("ORDER");
     @Autowired
     InventoryService inventoryService;
     @Autowired
     InventoryStore inventoryStore;
     @Autowired
     ReservationStore reservationStore;
-
     int threadCount;
+
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
+    }
 
     @BeforeEach
     void run() {
