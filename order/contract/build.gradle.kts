@@ -7,8 +7,6 @@ repositories {
 
 dependencies {
     implementation(project(":event:core"))
-
-
 }
 
 tasks.test {
