@@ -7,6 +7,9 @@ repositories {
 
 dependencies {
     implementation(project(":event:core"))
+    implementation(project(":event:atomicity:supports:jpa"))
+
+    implementation("org.springframework:spring-context")
 }
 
 tasks.test {

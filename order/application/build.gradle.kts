@@ -16,7 +16,6 @@ dependencies {
 
     implementation(project(":event:core"))
     implementation(project(":event:atomicity:supports:jpa"))
-    implementation(project(":event:handler:supports:kafka"))
 
     implementation(project(":order:contract"))
 
