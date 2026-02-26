@@ -1,9 +1,9 @@
 package com.lilamaris.stockwolf.event.core.serializer;
 
-import com.lilamaris.stockwolf.event.core.payload.EventEnvelope;
-import com.lilamaris.stockwolf.event.core.payload.EventHeader;
-import com.lilamaris.stockwolf.event.core.payload.EventPayload;
-import com.lilamaris.stockwolf.event.core.payload.EventTrace;
+import com.lilamaris.stockwolf.event.core.EventEnvelope;
+import com.lilamaris.stockwolf.event.core.EventHeader;
+import com.lilamaris.stockwolf.event.core.EventPayload;
+import com.lilamaris.stockwolf.event.core.EventTrace;
 
 public interface EventCodec {
     EventHeader decodeHeader(String raw);

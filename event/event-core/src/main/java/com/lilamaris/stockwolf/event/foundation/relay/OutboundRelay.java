@@ -1,19 +1,19 @@
-package com.lilamaris.stockwolf.event.relay;
+package com.lilamaris.stockwolf.event.foundation.relay;
 
-import com.lilamaris.stockwolf.event.core.payload.EventEnvelope;
-import com.lilamaris.stockwolf.event.core.relay.outgoing.EventPublisher;
-import com.lilamaris.stockwolf.event.core.relay.outgoing.OutgoingStore;
+import com.lilamaris.stockwolf.event.core.EventEnvelope;
+import com.lilamaris.stockwolf.event.core.relay.outbound.EventPublisher;
+import com.lilamaris.stockwolf.event.core.relay.outbound.OutboundStore;
 import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
 
 import java.util.List;
 
-public class OutgoingEventRelay {
-    private final OutgoingStore store;
+public class OutboundRelay {
+    private final OutboundStore store;
     private final EventPublisher publisher;
     private final EventCodec codec;
 
-    public OutgoingEventRelay(
-            OutgoingStore store,
+    public OutboundRelay(
+            OutboundStore store,
             EventPublisher publisher,
             EventCodec codec
     ) {

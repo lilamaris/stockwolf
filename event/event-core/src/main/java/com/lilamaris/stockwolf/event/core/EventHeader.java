@@ -1,9 +1,9 @@
-package com.lilamaris.stockwolf.event.core.payload;
+package com.lilamaris.stockwolf.event.core;
 
 import java.time.Instant;
 
 public interface EventHeader {
-    String eventKey();
+    EventKey eventKey();
 
     Instant occurredAt();
 }

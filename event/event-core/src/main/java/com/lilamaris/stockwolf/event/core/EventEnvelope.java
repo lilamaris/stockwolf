@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.event.core.payload;
+package com.lilamaris.stockwolf.event.core;
 
 public interface EventEnvelope<P extends EventPayload> {
     EventHeader header();

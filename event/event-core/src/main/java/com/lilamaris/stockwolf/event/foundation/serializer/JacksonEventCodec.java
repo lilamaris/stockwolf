@@ -1,11 +1,13 @@
 package com.lilamaris.stockwolf.event.foundation.serializer;
 
-import com.lilamaris.stockwolf.event.core.payload.EventHeader;
-import com.lilamaris.stockwolf.event.core.payload.EventPayload;
-import com.lilamaris.stockwolf.event.core.payload.EventTrace;
+import com.lilamaris.stockwolf.event.core.EventHeader;
+import com.lilamaris.stockwolf.event.core.EventKey;
+import com.lilamaris.stockwolf.event.core.EventPayload;
+import com.lilamaris.stockwolf.event.core.EventTrace;
 import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
-import com.lilamaris.stockwolf.event.foundation.payload.DefaultEventHeader;
-import com.lilamaris.stockwolf.event.foundation.payload.DefaultEventTrace;
+import com.lilamaris.stockwolf.event.foundation.DefaultEventHeader;
+import com.lilamaris.stockwolf.event.foundation.DefaultEventKey;
+import com.lilamaris.stockwolf.event.foundation.DefaultEventTrace;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -23,7 +25,7 @@ public class JacksonEventCodec implements EventCodec {
     public EventHeader decodeHeader(String raw) {
         JsonNode root = objectMapper.readTree(raw);
 
-        String eventKey = requiredField(root, "eventKey");
+        EventKey eventKey = DefaultEventKey.of(requiredField(root, "eventKey"));
         Instant occurredAt = Instant.parse(requiredField(root, "occurredAt"));
 
         return new DefaultEventHeader(eventKey, occurredAt);
@@ -51,7 +53,7 @@ public class JacksonEventCodec implements EventCodec {
     public String encode(EventHeader header, EventTrace trace, EventPayload payload) {
         ObjectNode root = objectMapper.createObjectNode();
 
-        root.put("eventKey", header.eventKey());
+        root.put("eventKey", header.eventKey().name());
         root.put("occurredAt", header.occurredAt().toString());
 
         JsonNode traceNode = objectMapper.valueToTree(trace);

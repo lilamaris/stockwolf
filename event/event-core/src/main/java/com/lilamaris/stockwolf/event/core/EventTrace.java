@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.event.core.payload;
+package com.lilamaris.stockwolf.event.core;
 
 import org.jspecify.annotations.Nullable;
 

@@ -1,9 +1,9 @@
 package com.lilamaris.stockwolf.event.supports.jpa;
 
-import com.lilamaris.stockwolf.event.core.payload.EventHeader;
-import com.lilamaris.stockwolf.event.core.payload.EventTrace;
-import com.lilamaris.stockwolf.event.foundation.payload.DefaultEventHeader;
-import com.lilamaris.stockwolf.event.foundation.payload.DefaultEventTrace;
+import com.lilamaris.stockwolf.event.core.EventHeader;
+import com.lilamaris.stockwolf.event.core.EventTrace;
+import com.lilamaris.stockwolf.event.foundation.DefaultEventHeader;
+import com.lilamaris.stockwolf.event.foundation.DefaultEventTrace;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -25,7 +25,6 @@ public class OutboxEventEntry {
     @Column(nullable = false)
     private String correlationId;
 
-    @Column(nullable = false)
     private String causationId;
 
     @Column(nullable = false)
@@ -50,11 +49,11 @@ public class OutboxEventEntry {
     private int attemptCount;
 
     public EventHeader getHeader() {
-        return new DefaultEventHeader(eventKey, occurredAt);
+        return DefaultEventHeader.of(eventKey, occurredAt);
     }
 
     public void setHeader(EventHeader header) {
-        this.eventKey = header.eventKey();
+        this.eventKey = header.eventKey().name();
         this.occurredAt = header.occurredAt();
     }
 
