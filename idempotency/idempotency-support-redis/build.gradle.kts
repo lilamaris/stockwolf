@@ -1,0 +1,16 @@
+group = "com.lilamaris.stockwolf"
+version = "0.0.1-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(project(":idempotency:idempotency-core"))
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("tools.jackson.core:jackson-databind")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
