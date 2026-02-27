@@ -10,10 +10,12 @@ import com.lilamaris.stockwolf.event.foundation.EventRegistry;
 import com.lilamaris.stockwolf.event.foundation.provider.SpringAppNameProducerProvider;
 import com.lilamaris.stockwolf.event.foundation.provider.ThreadLocalCorrelationProvider;
 import com.lilamaris.stockwolf.event.foundation.provider.UuidEventIdProvider;
+import com.lilamaris.stockwolf.event.foundation.serializer.JacksonEventCodec;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -27,6 +29,14 @@ public class EventAutoConfiguration {
             EventCodec codec
     ) {
         return new EventRegistry(eventDefinitions, eventHandlers, codec);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(EventCodec.class)
+    EventCodec eventCodec(
+            ObjectMapper objectMapper
+    ) {
+        return new JacksonEventCodec(objectMapper);
     }
 
     @Bean

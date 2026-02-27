@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface OutboxEventRepository extends JpaRepository<OutboxEventEntry, String> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select e from OutboxEventEntity e where e.status = 'PENDING' order by e.occurredAt")
+    @Query("select e from OutboxEventEntry e where e.status = 'PENDING' order by e.occurredAt")
     List<OutboxEventEntry> findPending();
 }

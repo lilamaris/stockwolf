@@ -1,8 +1,12 @@
 package com.lilamaris.stockwolf.order.application.service;
 
+import com.lilamaris.stockwolf.event.core.relay.outbound.OutboundStore;
+import com.lilamaris.stockwolf.event.foundation.DefaultEventContext;
 import com.lilamaris.stockwolf.order.application.port.in.OrderEntry;
 import com.lilamaris.stockwolf.order.application.port.in.OrderManager;
 import com.lilamaris.stockwolf.order.application.port.out.OrderStore;
+import com.lilamaris.stockwolf.order.contract.event.definition.OrderEventKey;
+import com.lilamaris.stockwolf.order.contract.event.payload.OrderCreatedEventPayload;
 import com.lilamaris.stockwolf.order.domain.Order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +17,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderService implements OrderManager {
     private final OrderStore orderStore;
+
+    private final OutboundStore outboundStore;
 
     @Override
     public OrderEntry create(CreateOrderCommand command) {
@@ -31,6 +37,12 @@ public class OrderService implements OrderManager {
                 ));
 
         orderStore.save(order);
+
+        outboundStore.enqueue(
+                OrderEventKey.ORDER_CREATED,
+                new DefaultEventContext("order", order.getId().toString(), null, null),
+                new OrderCreatedEventPayload(order.getId().toString())
+        );
 
         return OrderEntry.from(order);
     }
