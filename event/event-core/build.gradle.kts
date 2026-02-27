@@ -10,6 +10,7 @@ dependencies {
     implementation("org.springframework:spring-tx")
     implementation("org.springframework.boot:spring-boot-autoconfigure")
     implementation("tools.jackson.core:jackson-databind")
+    implementation("org.slf4j:slf4j-api")
 }
 
 tasks.test {
