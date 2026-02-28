@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.event.supports.jpa;
+package com.lilamaris.stockwolf.event.support.jpa;
 
 public enum OutboxEventStatus {
     PENDING,

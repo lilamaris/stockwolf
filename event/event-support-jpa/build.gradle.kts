@@ -7,7 +7,6 @@ repositories {
 
 dependencies {
     implementation(project(":event:event-core"))
-
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("tools.jackson.core:jackson-databind")
 }

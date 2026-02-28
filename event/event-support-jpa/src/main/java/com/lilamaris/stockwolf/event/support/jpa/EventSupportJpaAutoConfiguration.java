@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.event.supports.jpa;
+package com.lilamaris.stockwolf.event.support.jpa;
 
 import com.lilamaris.stockwolf.event.core.provider.CorrelationProvider;
 import com.lilamaris.stockwolf.event.core.provider.EventIdProvider;
