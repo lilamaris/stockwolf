@@ -5,9 +5,11 @@ import com.lilamaris.stockwolf.event.core.provider.CorrelationProvider;
 import com.lilamaris.stockwolf.event.core.provider.EventIdProvider;
 import com.lilamaris.stockwolf.event.core.provider.ProducerProvider;
 import com.lilamaris.stockwolf.event.core.relay.outbound.OutboundStore;
+import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
 import com.lilamaris.stockwolf.event.foundation.DefaultEventHeader;
 import com.lilamaris.stockwolf.event.foundation.DefaultEventTrace;
-import tools.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.util.List;
@@ -15,7 +17,7 @@ import java.util.Optional;
 
 public class OutboxStore implements OutboundStore {
     private final OutboxEventRepository repository;
-    private final ObjectMapper objectMapper;
+    private final EventCodec eventCodec;
 
     private final Clock clock;
     private final EventIdProvider eventIdProvider;
@@ -24,14 +26,14 @@ public class OutboxStore implements OutboundStore {
 
     public OutboxStore(
             OutboxEventRepository repository,
-            ObjectMapper objectMapper,
+            EventCodec eventCodec,
             Clock clock,
             EventIdProvider eventIdProvider,
             ProducerProvider producerProvider,
             CorrelationProvider correlationProvider
     ) {
         this.repository = repository;
-        this.objectMapper = objectMapper;
+        this.eventCodec = eventCodec;
         this.clock = clock;
         this.eventIdProvider = eventIdProvider;
         this.producerProvider = producerProvider;
@@ -39,12 +41,22 @@ public class OutboxStore implements OutboundStore {
     }
 
     @Override
-    public List<EventEnvelope<?>> claimBatch(int size) {
-        return List.of();
+    @Transactional
+    public List<? extends EventEnvelope> claimBatch(int size) {
+        var entries = repository.findPending(PageRequest.of(0, size));
+
+        for (var e : entries) {
+            e.setStatus(OutboxEventStatus.PROCESSING);
+            e.setAttemptCount(e.getAttemptCount() + 1);
+        }
+
+        repository.flush();
+
+        return entries;
     }
 
     @Override
-    public void enqueue(EventKey eventKey, EventContext context, EventPayload payload) {
+    public <P extends EventPayload> void enqueue(EventKey eventKey, EventContext context, P payload) {
         String eventId = eventIdProvider.newId();
         String producer = producerProvider.producer();
         var occurredAt = clock.instant();
@@ -71,16 +83,15 @@ public class OutboxStore implements OutboundStore {
                 context.aggregateId()
         );
 
-        OutboxEventEntry e = new OutboxEventEntry();
-        e.setHeader(h);
-        e.setTrace(t);
-        e.setPayloadJson(objectMapper.writeValueAsString(payload));
-        e.setStatus(OutboxEventStatus.PENDING);
+        String raw = eventCodec.encodePayload(payload);
+
+        var e = OutboxEventEnvelope.of(eventId, h, t, raw);
 
         repository.save(e);
     }
 
     @Override
+    @Transactional
     public void markSent(String eventId) {
         var e = repository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format(
@@ -88,9 +99,11 @@ public class OutboxStore implements OutboundStore {
                 )));
 
         e.setStatus(OutboxEventStatus.SENT);
+        e.setSentAt(clock.instant());
     }
 
     @Override
+    @Transactional
     public void markFailed(String eventId, String reason) {
         var e = repository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format(

@@ -1,9 +1,9 @@
 package com.lilamaris.stockwolf.event.core;
 
-public interface EventEnvelope<P extends EventPayload> {
+public interface EventEnvelope {
     EventHeader header();
 
-    P payload();
-
     EventTrace trace();
+
+    String raw();
 }

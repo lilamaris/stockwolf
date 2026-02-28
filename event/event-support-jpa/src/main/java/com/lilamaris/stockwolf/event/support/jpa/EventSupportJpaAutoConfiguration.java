@@ -4,6 +4,7 @@ import com.lilamaris.stockwolf.event.core.provider.CorrelationProvider;
 import com.lilamaris.stockwolf.event.core.provider.EventIdProvider;
 import com.lilamaris.stockwolf.event.core.provider.ProducerProvider;
 import com.lilamaris.stockwolf.event.core.relay.outbound.OutboundStore;
+import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
 import com.lilamaris.stockwolf.event.foundation.relay.OutboundRelay;
 import jakarta.persistence.EntityManager;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -13,13 +14,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.JpaRepository;
-import tools.jackson.databind.ObjectMapper;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.time.Clock;
 
 @AutoConfiguration
 @AutoConfigureAfter(DataJpaRepositoriesAutoConfiguration.class)
 @ConditionalOnClass({EntityManager.class, JpaRepository.class})
+@EnableScheduling
 public class EventSupportJpaAutoConfiguration {
     @Bean
     public Clock systemClock() {
@@ -30,13 +32,13 @@ public class EventSupportJpaAutoConfiguration {
     @ConditionalOnMissingBean(OutboundStore.class)
     OutboundStore outboundStore(
             OutboxEventRepository repository,
-            ObjectMapper objectMapper,
+            EventCodec eventCodec,
             Clock clock,
             EventIdProvider eventIdProvider,
             ProducerProvider producerProvider,
             CorrelationProvider correlationProvider
     ) {
-        return new OutboxStore(repository, objectMapper, clock, eventIdProvider, producerProvider, correlationProvider);
+        return new OutboxStore(repository, eventCodec, clock, eventIdProvider, producerProvider, correlationProvider);
     }
 
     @Bean

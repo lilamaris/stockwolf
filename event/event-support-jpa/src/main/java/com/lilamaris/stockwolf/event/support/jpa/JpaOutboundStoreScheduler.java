@@ -12,7 +12,6 @@ public class JpaOutboundStoreScheduler {
         this.outboundRelay = outboundRelay;
     }
 
-
     @Scheduled(fixedDelayString = "${event.outbound.relay.fixedDelayMs:500}")
     public void tick() {
         outboundRelay.batch(100);

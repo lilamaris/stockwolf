@@ -5,21 +5,27 @@ import com.lilamaris.stockwolf.event.core.EventHandler;
 import com.lilamaris.stockwolf.event.core.provider.CorrelationProvider;
 import com.lilamaris.stockwolf.event.core.provider.EventIdProvider;
 import com.lilamaris.stockwolf.event.core.provider.ProducerProvider;
+import com.lilamaris.stockwolf.event.core.relay.outbound.EventPublisher;
+import com.lilamaris.stockwolf.event.core.relay.outbound.OutboundStore;
 import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
 import com.lilamaris.stockwolf.event.foundation.EventRegistry;
 import com.lilamaris.stockwolf.event.foundation.provider.SpringAppNameProducerProvider;
 import com.lilamaris.stockwolf.event.foundation.provider.ThreadLocalCorrelationProvider;
 import com.lilamaris.stockwolf.event.foundation.provider.UuidEventIdProvider;
+import com.lilamaris.stockwolf.event.foundation.relay.OutboundRelay;
 import com.lilamaris.stockwolf.event.foundation.serializer.JacksonEventCodec;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
 @AutoConfiguration
+@AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class EventAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(EventRegistry.class)
@@ -52,5 +58,16 @@ public class EventAutoConfiguration {
     @Bean
     CorrelationProvider correlationProvider() {
         return new ThreadLocalCorrelationProvider();
+    }
+
+    @Bean
+    OutboundRelay outboundRelay(
+            OutboundStore outboundStore,
+            EventPublisher eventPublisher
+    ) {
+        return new OutboundRelay(
+                outboundStore,
+                eventPublisher
+        );
     }
 }

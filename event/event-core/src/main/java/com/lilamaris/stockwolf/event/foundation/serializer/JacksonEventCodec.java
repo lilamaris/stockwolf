@@ -50,14 +50,19 @@ public class JacksonEventCodec implements EventCodec {
     }
 
     @Override
-    public String encode(EventHeader header, EventTrace trace, EventPayload payload) {
+    public <P extends EventPayload> String encodePayload(P payload) {
+        return objectMapper.writeValueAsString(payload);
+    }
+
+    @Override
+    public String encode(EventHeader header, EventTrace trace, String raw) {
         ObjectNode root = objectMapper.createObjectNode();
 
         root.put("eventKey", header.eventKey().name());
         root.put("occurredAt", header.occurredAt().toString());
 
         JsonNode traceNode = objectMapper.valueToTree(trace);
-        JsonNode payloadNode = objectMapper.valueToTree(payload);
+        JsonNode payloadNode = objectMapper.valueToTree(raw);
 
         root.set("trace", traceNode);
         root.set("payload", payloadNode);

@@ -8,9 +8,9 @@ import com.lilamaris.stockwolf.event.core.EventPayload;
 import java.util.List;
 
 public interface OutboundStore {
-    List<EventEnvelope<?>> claimBatch(int size);
+    List<? extends EventEnvelope> claimBatch(int size);
 
-    void enqueue(EventKey eventKey, EventContext context, EventPayload payload);
+    <P extends EventPayload> void enqueue(EventKey eventKey, EventContext context, P payload);
 
     void markSent(String eventId);
 
