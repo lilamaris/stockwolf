@@ -4,6 +4,7 @@ import com.lilamaris.stockwolf.event.core.provider.CorrelationProvider;
 import com.lilamaris.stockwolf.event.core.provider.EventIdProvider;
 import com.lilamaris.stockwolf.event.core.provider.ProducerProvider;
 import com.lilamaris.stockwolf.event.core.relay.outbound.OutboundStore;
+import com.lilamaris.stockwolf.event.foundation.relay.OutboundRelay;
 import jakarta.persistence.EntityManager;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -36,5 +37,12 @@ public class EventSupportJpaAutoConfiguration {
             CorrelationProvider correlationProvider
     ) {
         return new OutboxStore(repository, objectMapper, clock, eventIdProvider, producerProvider, correlationProvider);
+    }
+
+    @Bean
+    public JpaOutboundStoreScheduler jpaOutboundStoreScheduler(
+            OutboundRelay outboundRelay
+    ) {
+        return new JpaOutboundStoreScheduler(outboundRelay);
     }
 }
