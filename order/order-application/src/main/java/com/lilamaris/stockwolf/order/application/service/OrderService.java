@@ -2,8 +2,10 @@ package com.lilamaris.stockwolf.order.application.service;
 
 import com.lilamaris.stockwolf.event.core.relay.outbound.OutboundStore;
 import com.lilamaris.stockwolf.event.foundation.DefaultEventContext;
+import com.lilamaris.stockwolf.order.application.port.in.CreateOrderCommand;
 import com.lilamaris.stockwolf.order.application.port.in.OrderEntry;
 import com.lilamaris.stockwolf.order.application.port.in.OrderManager;
+import com.lilamaris.stockwolf.order.application.port.out.ActorContext;
 import com.lilamaris.stockwolf.order.application.port.out.OrderStore;
 import com.lilamaris.stockwolf.order.contract.event.definition.OrderEventKey;
 import com.lilamaris.stockwolf.order.contract.event.payload.OrderCreatedEventPayload;
@@ -18,15 +20,17 @@ import java.util.UUID;
 public class OrderService implements OrderManager {
     private final OrderStore orderStore;
 
+    private final ActorContext actorContext;
     private final OutboundStore outboundStore;
 
     @Override
     public OrderEntry create(CreateOrderCommand command) {
         var correlationId = UUID.randomUUID().toString();
+        var actor = actorContext.get();
 
         var order = Order.create(
                 correlationId,
-                command.userId()
+                actor.subject()
         );
 
         command.items().forEach(
