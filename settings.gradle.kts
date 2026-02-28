@@ -7,6 +7,7 @@ include("idempotency:idempotency-support-jpa")
 
 include("event:event-core")
 include("event:event-support-jpa")
+include("event:event-support-kafka")
 
 include("identity:identity-application")
 include("identity:identity-client")
