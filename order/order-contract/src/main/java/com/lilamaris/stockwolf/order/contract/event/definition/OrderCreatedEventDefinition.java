@@ -11,6 +11,11 @@ public class OrderCreatedEventDefinition implements EventDefinition<OrderCreated
     }
 
     @Override
+    public String producer() {
+        return "order-service";
+    }
+
+    @Override
     public Class<OrderCreatedEventPayload> payload() {
         return OrderCreatedEventPayload.class;
     }

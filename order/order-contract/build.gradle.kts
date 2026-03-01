@@ -7,6 +7,7 @@ repositories {
 
 dependencies {
     implementation(project(":event:event-core"))
+    implementation("org.springframework:spring-context")
 }
 
 tasks.test {
