@@ -1,19 +1,19 @@
 package com.lilamaris.stockwolf.event.support.jpa;
 
-import com.lilamaris.stockwolf.event.foundation.relay.OutboundRelay;
+import com.lilamaris.stockwolf.event.core.outbound.SimpleOutboundRelay;
 import org.springframework.scheduling.annotation.Scheduled;
 
 public class JpaOutboundStoreScheduler {
-    private final OutboundRelay outboundRelay;
+    private final SimpleOutboundRelay simpleOutboundRelay;
 
     public JpaOutboundStoreScheduler(
-            OutboundRelay outboundRelay
+            SimpleOutboundRelay simpleOutboundRelay
     ) {
-        this.outboundRelay = outboundRelay;
+        this.simpleOutboundRelay = simpleOutboundRelay;
     }
 
     @Scheduled(fixedDelayString = "${event.outbound.relay.fixedDelayMs:500}")
     public void tick() {
-        outboundRelay.batch(100);
+        simpleOutboundRelay.batch(100);
     }
 }

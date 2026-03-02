@@ -1,6 +1,7 @@
 package com.lilamaris.stockwolf.event.support.kafka;
 
-import com.lilamaris.stockwolf.event.core.relay.outbound.EventPublisher;
+import com.lilamaris.stockwolf.event.core.outbound.EventPublisher;
+import com.lilamaris.stockwolf.event.foundation.EventRegistry;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

@@ -1,6 +1,4 @@
-package com.lilamaris.stockwolf.event.foundation;
-
-import com.lilamaris.stockwolf.event.core.EventKey;
+package com.lilamaris.stockwolf.event.core;
 
 public record DefaultEventKey(
         String name

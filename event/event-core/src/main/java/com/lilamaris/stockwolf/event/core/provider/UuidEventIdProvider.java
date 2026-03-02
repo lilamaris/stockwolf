@@ -1,6 +1,4 @@
-package com.lilamaris.stockwolf.event.foundation.provider;
-
-import com.lilamaris.stockwolf.event.core.provider.EventIdProvider;
+package com.lilamaris.stockwolf.event.core.provider;
 
 import java.util.UUID;
 

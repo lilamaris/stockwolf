@@ -1,17 +1,15 @@
-package com.lilamaris.stockwolf.event.foundation.relay;
+package com.lilamaris.stockwolf.event.core.outbound;
 
 import com.lilamaris.stockwolf.event.core.EventKey;
-import com.lilamaris.stockwolf.event.core.relay.outbound.EventPublisher;
-import com.lilamaris.stockwolf.event.core.relay.outbound.OutboundStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OutboundRelay {
-    private static final Logger log = LoggerFactory.getLogger(OutboundRelay.class);
+public class SimpleOutboundRelay {
+    private static final Logger log = LoggerFactory.getLogger(SimpleOutboundRelay.class);
     private final OutboundStore store;
     private final EventPublisher publisher;
 
-    public OutboundRelay(
+    public SimpleOutboundRelay(
             OutboundStore store,
             EventPublisher publisher
     ) {

@@ -1,8 +1,8 @@
 package com.lilamaris.stockwolf.event.support.jpa;
 
+import com.lilamaris.stockwolf.event.core.DefaultEventKey;
 import com.lilamaris.stockwolf.event.core.EventHeader;
 import com.lilamaris.stockwolf.event.core.EventKey;
-import com.lilamaris.stockwolf.event.foundation.DefaultEventKey;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 

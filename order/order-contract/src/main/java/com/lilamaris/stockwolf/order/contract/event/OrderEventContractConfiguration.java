@@ -1,6 +1,6 @@
 package com.lilamaris.stockwolf.order.contract.event;
 
-import com.lilamaris.stockwolf.event.core.EventDefinition;
+import com.lilamaris.stockwolf.event.core.outbound.EventDefinition;
 import com.lilamaris.stockwolf.order.contract.event.definition.OrderCanceledEventDefinition;
 import com.lilamaris.stockwolf.order.contract.event.definition.OrderCreatedEventDefinition;
 import org.springframework.context.annotation.Bean;

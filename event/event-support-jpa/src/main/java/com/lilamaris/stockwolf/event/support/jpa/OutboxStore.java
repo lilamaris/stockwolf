@@ -1,13 +1,11 @@
 package com.lilamaris.stockwolf.event.support.jpa;
 
 import com.lilamaris.stockwolf.event.core.*;
+import com.lilamaris.stockwolf.event.core.outbound.OutboundStore;
 import com.lilamaris.stockwolf.event.core.provider.CorrelationProvider;
 import com.lilamaris.stockwolf.event.core.provider.EventIdProvider;
 import com.lilamaris.stockwolf.event.core.provider.ProducerProvider;
-import com.lilamaris.stockwolf.event.core.relay.outbound.OutboundStore;
 import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
-import com.lilamaris.stockwolf.event.foundation.DefaultEventHeader;
-import com.lilamaris.stockwolf.event.foundation.DefaultEventTrace;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 

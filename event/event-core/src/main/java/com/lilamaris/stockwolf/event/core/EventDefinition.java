@@ -1,7 +1,0 @@
-package com.lilamaris.stockwolf.event.core;
-
-public interface EventDefinition<P extends EventPayload> {
-    EventKey key();
-
-    Class<P> payload();
-}

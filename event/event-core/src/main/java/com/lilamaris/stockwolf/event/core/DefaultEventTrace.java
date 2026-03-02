@@ -1,6 +1,4 @@
-package com.lilamaris.stockwolf.event.foundation;
-
-import com.lilamaris.stockwolf.event.core.EventTrace;
+package com.lilamaris.stockwolf.event.core;
 
 public record DefaultEventTrace(
         String eventId,

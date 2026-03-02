@@ -1,6 +1,5 @@
-package com.lilamaris.stockwolf.event.foundation.provider;
+package com.lilamaris.stockwolf.event.core.provider;
 
-import com.lilamaris.stockwolf.event.core.provider.ProducerProvider;
 import org.springframework.core.env.Environment;
 
 public class SpringAppNameProducerProvider implements ProducerProvider {

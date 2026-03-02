@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.event.core.relay.outbound;
+package com.lilamaris.stockwolf.event.core.outbound;
 
 import com.lilamaris.stockwolf.event.core.EventKey;
 

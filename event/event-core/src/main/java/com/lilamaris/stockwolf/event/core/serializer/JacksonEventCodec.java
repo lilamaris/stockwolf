@@ -1,13 +1,6 @@
-package com.lilamaris.stockwolf.event.foundation.serializer;
+package com.lilamaris.stockwolf.event.core.serializer;
 
-import com.lilamaris.stockwolf.event.core.EventHeader;
-import com.lilamaris.stockwolf.event.core.EventKey;
-import com.lilamaris.stockwolf.event.core.EventPayload;
-import com.lilamaris.stockwolf.event.core.EventTrace;
-import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
-import com.lilamaris.stockwolf.event.foundation.DefaultEventHeader;
-import com.lilamaris.stockwolf.event.foundation.DefaultEventKey;
-import com.lilamaris.stockwolf.event.foundation.DefaultEventTrace;
+import com.lilamaris.stockwolf.event.core.*;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;

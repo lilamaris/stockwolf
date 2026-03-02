@@ -1,7 +1,7 @@
 package com.lilamaris.stockwolf.event.support.kafka;
 
 import com.lilamaris.stockwolf.event.core.EventKey;
-import com.lilamaris.stockwolf.event.core.relay.outbound.EventPublisher;
+import com.lilamaris.stockwolf.event.core.outbound.EventPublisher;
 import org.springframework.kafka.core.KafkaTemplate;
 
 public class KafkaEventPublisher implements EventPublisher {

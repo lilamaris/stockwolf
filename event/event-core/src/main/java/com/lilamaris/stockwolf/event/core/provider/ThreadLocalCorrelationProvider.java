@@ -1,6 +1,5 @@
-package com.lilamaris.stockwolf.event.foundation.provider;
+package com.lilamaris.stockwolf.event.core.provider;
 
-import com.lilamaris.stockwolf.event.core.provider.CorrelationProvider;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.MDC;
 

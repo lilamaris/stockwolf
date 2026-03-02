@@ -1,7 +1,4 @@
-package com.lilamaris.stockwolf.event.foundation;
-
-import com.lilamaris.stockwolf.event.core.EventHeader;
-import com.lilamaris.stockwolf.event.core.EventKey;
+package com.lilamaris.stockwolf.event.core;
 
 import java.time.Instant;
 

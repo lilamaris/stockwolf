@@ -1,6 +1,5 @@
-package com.lilamaris.stockwolf.event.foundation;
+package com.lilamaris.stockwolf.event.core;
 
-import com.lilamaris.stockwolf.event.core.EventContext;
 import org.jspecify.annotations.Nullable;
 
 public record DefaultEventContext(
