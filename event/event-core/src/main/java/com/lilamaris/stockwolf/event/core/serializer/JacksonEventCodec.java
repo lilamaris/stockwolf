@@ -5,9 +5,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
-import java.time.Instant;
-
-public class JacksonEventCodec implements EventCodec {
+public class JacksonEventCodec implements EventCodec, PayloadSerializer, PayloadDeserializer {
     private final ObjectMapper objectMapper;
 
     public JacksonEventCodec(ObjectMapper objectMapper) {
@@ -15,52 +13,36 @@ public class JacksonEventCodec implements EventCodec {
     }
 
     @Override
-    public EventHeader decodeHeader(String raw) {
+    public EventEnvelope decode(String raw) {
         JsonNode root = objectMapper.readTree(raw);
+        String rawHeader = requiredField(root, "header");
+        String rawTrace = requiredField(root, "trace");
+        String rawPayload = requiredField(root, "payload");
 
-        EventKey eventKey = DefaultEventKey.of(requiredField(root, "eventKey"));
-        Instant occurredAt = Instant.parse(requiredField(root, "occurredAt"));
-
-        return new DefaultEventHeader(eventKey, occurredAt);
+        EventHeader eventHeader = objectMapper.readValue(rawHeader, SimpleEventHeader.class);
+        EventTrace eventTrace = objectMapper.readValue(rawTrace, SimpleEventTrace.class);
+        return new SimpleEventEnvelope(eventHeader, eventTrace, rawPayload);
     }
 
     @Override
-    public EventTrace decodeTrace(String raw) {
-        JsonNode root = objectMapper.readTree(raw);
-        return objectMapper.treeToValue(root.get("trace"), DefaultEventTrace.class);
-    }
-
-    @Override
-    public <P extends EventPayload> P decodePayload(String raw, Class<P> payloadType) {
-        JsonNode root = objectMapper.readTree(raw);
-        JsonNode payloadNode = root.get("payload");
-
-        if (payloadNode == null || payloadNode.isNull()) {
-            throw new IllegalArgumentException("payload is missing");
-        }
-
-        return objectMapper.treeToValue(payloadNode, payloadType);
-    }
-
-    @Override
-    public <P extends EventPayload> String encodePayload(P payload) {
-        return objectMapper.writeValueAsString(payload);
-    }
-
-    @Override
-    public String encode(EventHeader header, EventTrace trace, String raw) {
+    public String encode(EventHeader header, EventTrace trace, String rawPayload) {
         ObjectNode root = objectMapper.createObjectNode();
 
-        root.put("eventKey", header.eventKey().name());
-        root.put("occurredAt", header.occurredAt().toString());
-
-        JsonNode traceNode = objectMapper.valueToTree(trace);
-        JsonNode payloadNode = objectMapper.valueToTree(raw);
-
-        root.set("trace", traceNode);
-        root.set("payload", payloadNode);
+        root.set("header", objectMapper.valueToTree(header));
+        root.set("trace", objectMapper.valueToTree(trace));
+        root.put("payload", rawPayload);
 
         return objectMapper.writeValueAsString(root);
+    }
+
+    @Override
+    public <P extends EventPayload> P materialize(String rawPayload, Class<P> payloadType) {
+        return objectMapper.readValue(rawPayload, payloadType);
+    }
+
+    @Override
+    public <P extends EventPayload> String stringify(P payload) {
+        return objectMapper.writeValueAsString(payload);
     }
 
     private String requiredField(JsonNode root, String field) {
