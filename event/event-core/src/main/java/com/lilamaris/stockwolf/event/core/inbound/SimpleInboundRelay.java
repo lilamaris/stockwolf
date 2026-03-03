@@ -4,7 +4,9 @@ import com.lilamaris.stockwolf.event.core.EventEnvelope;
 import com.lilamaris.stockwolf.event.core.EventHeader;
 import com.lilamaris.stockwolf.event.core.EventPayload;
 import com.lilamaris.stockwolf.event.core.EventTrace;
-import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
+import com.lilamaris.stockwolf.event.core.serializer.PayloadDeserializer;
+import com.lilamaris.stockwolf.event.core.store.EventFlow;
+import com.lilamaris.stockwolf.event.core.store.EventStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,22 +15,22 @@ import java.util.List;
 public class SimpleInboundRelay implements InboundRelay {
     private static final Logger log = LoggerFactory.getLogger(SimpleInboundRelay.class);
     private final EventListenerRegistrar eventListenerRegistrar;
-    private final EventCodec eventCodec;
-    private final InboundStore inboundStore;
+    private final PayloadDeserializer payloadDeserializer;
+    private final EventStore eventStore;
 
     public SimpleInboundRelay(
             EventListenerRegistrar eventListenerRegistrar,
-            EventCodec eventCodec,
-            InboundStore inboundStore
+            PayloadDeserializer payloadDeserializer,
+            EventStore eventStore
     ) {
         this.eventListenerRegistrar = eventListenerRegistrar;
-        this.eventCodec = eventCodec;
-        this.inboundStore = inboundStore;
+        this.payloadDeserializer = payloadDeserializer;
+        this.eventStore = eventStore;
     }
 
     @Override
     public void batch(int size) {
-        List<? extends EventEnvelope> entries = inboundStore.claimBatch(size);
+        List<? extends EventEnvelope> entries = eventStore.claimBatch(size, EventFlow.INBOUND);
 
         for (var e : entries) {
             var eventHeader = e.header();
@@ -40,7 +42,7 @@ public class SimpleInboundRelay implements InboundRelay {
                 continue;
             }
 
-            var payload = eventCodec.decodePayload(e.raw(), listener.payload());
+            var payload = payloadDeserializer.materialize(e.rawPayload(), listener.payload());
 
             invoke(
                     listener,
