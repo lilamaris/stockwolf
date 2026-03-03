@@ -1,8 +1,8 @@
 package com.lilamaris.stockwolf.event.core;
 
-public record DefaultEventEnvelope(
+public record SimpleEventEnvelope(
         EventHeader header,
         EventTrace trace,
-        String raw
+        String rawPayload
 ) implements EventEnvelope {
 }

@@ -5,5 +5,5 @@ public interface EventEnvelope {
 
     EventTrace trace();
 
-    String raw();
+    String rawPayload();
 }

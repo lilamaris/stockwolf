@@ -2,7 +2,7 @@ package com.lilamaris.stockwolf.event.core;
 
 import org.jspecify.annotations.Nullable;
 
-public interface EventContext {
+public interface EventDynamicContext {
     String aggregateType();
 
     String aggregateId();
