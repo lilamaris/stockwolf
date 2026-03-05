@@ -23,6 +23,7 @@ public class JpaEventStore implements EventStore {
     }
 
     @Override
+    @Transactional
     public void accept(EventEnvelope eventEnvelope, EventFlow eventFlow) {
         var storedEventEnvelope = JpaStoredEventEnvelope.of(eventEnvelope, eventFlow);
         repository.save(storedEventEnvelope);
@@ -34,12 +35,14 @@ public class JpaEventStore implements EventStore {
     }
 
     @Override
+    @Transactional
     public List<? extends StoredEventEnvelope> claimBatch(int size, EventFlow flow) {
         var page = PageRequest.of(0, size);
         return repository.claimBatch(StoredEventStatus.PROCESSING, page);
     }
 
     @Override
+    @Transactional
     public void markComplete(String eventId) {
         var event = repository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format(
