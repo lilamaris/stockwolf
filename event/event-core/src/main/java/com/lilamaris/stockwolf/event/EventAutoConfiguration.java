@@ -113,6 +113,16 @@ public class EventAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(EventDefinitionRegistrar.class)
+    EventDefinitionRegistrar eventDefinitionRegistrar(
+            List<EventDefinition<?>> definitions
+    ) {
+        return new SimpleEventDefinitionRegistrar(
+                definitions
+        );
+    }
+
+    @Bean
     @ConditionalOnMissingBean(EventCodec.class)
     EventCodec eventCodec(
             ObjectMapper objectMapper
