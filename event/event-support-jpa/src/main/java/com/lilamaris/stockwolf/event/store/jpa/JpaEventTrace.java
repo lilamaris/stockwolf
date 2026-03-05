@@ -1,4 +1,4 @@
-package com.lilamaris.stockwolf.event.support.jpa;
+package com.lilamaris.stockwolf.event.store.jpa;
 
 import com.lilamaris.stockwolf.event.core.EventTrace;
 import jakarta.persistence.Column;
@@ -24,6 +24,25 @@ public class JpaEventTrace implements EventTrace {
 
     @Column(name = "aggregate_id", nullable = false)
     private String aggregateId;
+
+    protected JpaEventTrace() {
+    }
+
+    public JpaEventTrace(
+            String eventId,
+            String correlationId,
+            String causationId,
+            String producer,
+            String aggregateType,
+            String aggregateId
+    ) {
+        this.eventId = eventId;
+        this.correlationId = correlationId;
+        this.causationId = causationId;
+        this.producer = producer;
+        this.aggregateType = aggregateType;
+        this.aggregateId = aggregateId;
+    }
 
     public static JpaEventTrace of(EventTrace eventTrace) {
         var t = new JpaEventTrace();

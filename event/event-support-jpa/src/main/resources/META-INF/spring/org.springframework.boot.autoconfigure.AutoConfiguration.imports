@@ -1,1 +1,1 @@
-com.lilamaris.stockwolf.event.support.jpa.EventSupportJpaAutoConfiguration
+com.lilamaris.stockwolf.event.store.jpa.EventSupportJpaAutoConfiguration
