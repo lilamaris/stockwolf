@@ -4,6 +4,8 @@ import com.lilamaris.stockwolf.event.core.factory.*;
 import com.lilamaris.stockwolf.event.core.inbound.*;
 import com.lilamaris.stockwolf.event.core.outbound.*;
 import com.lilamaris.stockwolf.event.core.provider.*;
+import com.lilamaris.stockwolf.event.core.scheduler.EventScheduler;
+import com.lilamaris.stockwolf.event.core.scheduler.FixedDelayEventScheduler;
 import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
 import com.lilamaris.stockwolf.event.core.serializer.JacksonEventCodec;
 import com.lilamaris.stockwolf.event.core.serializer.PayloadDeserializer;
@@ -15,6 +17,7 @@ import com.lilamaris.stockwolf.event.core.store.StoredEventEnvelopeFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
@@ -25,6 +28,7 @@ import java.util.List;
 
 @AutoConfiguration
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
+@EnableConfigurationProperties(EventProperties.class)
 public class EventAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(InboundRelay.class)
@@ -49,6 +53,18 @@ public class EventAutoConfiguration {
         return new SimpleOutboundRelay(
                 eventStore,
                 eventSender
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(EventScheduler.class)
+    EventScheduler eventScheduler(
+            OutboundRelay outboundRelay,
+            EventProperties properties
+    ) {
+        return new FixedDelayEventScheduler(
+                outboundRelay,
+                properties.scheduler().batchSize()
         );
     }
 
