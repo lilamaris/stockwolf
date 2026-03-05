@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":event:event-core"))
     implementation("org.springframework.boot:spring-boot-autoconfigure")
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.slf4j:slf4j-api")
 }
 
 tasks.test {
