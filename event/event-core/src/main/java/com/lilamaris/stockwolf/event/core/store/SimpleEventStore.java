@@ -29,7 +29,7 @@ public class SimpleEventStore implements EventStore {
 
         entryMap.putIfAbsent(eventId, entry);
 
-        log.info("""
+        log.debug("""
                 PutIfAbsent({}, {})
                 Current={}
                 """, eventId, entry, entryMap);
@@ -44,7 +44,7 @@ public class SimpleEventStore implements EventStore {
                 .limit(size)
                 .toList();
 
-        log.info("""
+        log.debug("""
                 Batched={}
                 """, result);
 
@@ -58,7 +58,7 @@ public class SimpleEventStore implements EventStore {
         var entry = entryMap.get(eventId);
         entry.markComplete();
 
-        log.info("""
+        log.debug("""
                 Mark completed={}
                 """, eventId);
     }
@@ -70,7 +70,7 @@ public class SimpleEventStore implements EventStore {
         var entry = entryMap.get(eventId);
         entry.markFail();
 
-        log.info("""
+        log.debug("""
                 Mark failed={}
                 """, eventId);
     }

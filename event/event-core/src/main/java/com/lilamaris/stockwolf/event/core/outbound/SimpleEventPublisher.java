@@ -50,7 +50,7 @@ public class SimpleEventPublisher implements EventPublisher {
 
         EventEnvelope eventEnvelope = eventEnvelopeFactory.build(eventHeader, eventTrace, rawPayload);
 
-        log.info("""
+        log.debug("""
                 Publish:
                 EventHeader={}
                 EventDynamicContext={},

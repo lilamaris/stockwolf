@@ -9,7 +9,7 @@ public class LogOnlyEventSender implements EventSender {
 
     @Override
     public void send(String topic, EventKey eventKey, String raw) {
-        log.info("""
+        log.debug("""
                 Sending event message:
                 topic={}, eventKey={}, raw={}
                 """, topic, eventKey.name(), raw);
