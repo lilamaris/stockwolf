@@ -1,6 +1,5 @@
 package com.lilamaris.stockwolf.event.core.outbound;
 
-import com.lilamaris.stockwolf.event.core.EventKey;
 import com.lilamaris.stockwolf.event.core.store.EventFlow;
 import com.lilamaris.stockwolf.event.core.store.EventStore;
 import org.slf4j.Logger;
@@ -26,9 +25,7 @@ public class SimpleOutboundRelay implements OutboundRelay {
 
         for (var e : batch) {
             try {
-                String topic = e.trace().producer() + ".events";
-                EventKey eventKey = e.header().eventKey();
-                eventSender.send(topic, eventKey, e.rawPayload());
+                eventSender.send(e);
                 store.markComplete(e.trace().eventId());
             } catch (Exception ex) {
                 store.markFailed(e.trace().eventId(), ex.getMessage());

@@ -1,8 +1,8 @@
 package com.lilamaris.stockwolf.event.core.outbound;
 
-import com.lilamaris.stockwolf.event.core.EventKey;
+import com.lilamaris.stockwolf.event.core.EventEnvelope;
 
 public interface EventSender {
-    void send(String topic, EventKey eventKey, String raw);
+    void send(EventEnvelope eventEnvelope);
 }
 
