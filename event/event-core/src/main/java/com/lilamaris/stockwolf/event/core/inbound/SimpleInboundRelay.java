@@ -23,7 +23,12 @@ public class SimpleInboundRelay implements InboundRelay {
         List<? extends EventEnvelope> entries = eventStore.claimBatch(size, EventFlow.INBOUND);
 
         for (var e : entries) {
-            eventRouter.route(e);
+            try {
+                eventRouter.route(e);
+                eventStore.markComplete(e.trace().eventId());
+            } catch (Exception ex) {
+                eventStore.markFailed(e.trace().eventId(), ex.getMessage());
+            }
         }
     }
 }
