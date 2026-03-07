@@ -7,9 +7,9 @@ import com.lilamaris.stockwolf.event.core.provider.*;
 import com.lilamaris.stockwolf.event.core.scheduler.EventScheduler;
 import com.lilamaris.stockwolf.event.core.scheduler.FixedDelayEventScheduler;
 import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
-import com.lilamaris.stockwolf.event.core.serializer.JacksonEventCodec;
 import com.lilamaris.stockwolf.event.core.serializer.EventDeserializer;
 import com.lilamaris.stockwolf.event.core.serializer.EventSerializer;
+import com.lilamaris.stockwolf.event.core.serializer.JacksonEventCodec;
 import com.lilamaris.stockwolf.event.core.store.EventStore;
 import com.lilamaris.stockwolf.event.core.store.SimpleEventStore;
 import com.lilamaris.stockwolf.event.core.store.SimpleStoredEventEnvelopeFactory;
@@ -48,11 +48,13 @@ public class EventAutoConfiguration {
     @ConditionalOnMissingBean(OutboundRelay.class)
     OutboundRelay outboundRelay(
             EventStore eventStore,
-            EventSender eventSender
+            EventSender eventSender,
+            EventEnvelopeFactory eventEnvelopeFactory
     ) {
         return new SimpleOutboundRelay(
                 eventStore,
-                eventSender
+                eventSender,
+                eventEnvelopeFactory
         );
     }
 
@@ -131,25 +133,37 @@ public class EventAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(EventCodec.class)
     EventCodec eventCodec(
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            EventEnvelopeFactory eventEnvelopeFactory
     ) {
-        return new JacksonEventCodec(objectMapper);
+        return new JacksonEventCodec(
+                objectMapper,
+                eventEnvelopeFactory
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean(EventSerializer.class)
     EventSerializer eventSerializer(
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            EventEnvelopeFactory eventEnvelopeFactory
     ) {
-        return new JacksonEventCodec(objectMapper);
+        return new JacksonEventCodec(
+                objectMapper,
+                eventEnvelopeFactory
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean(EventDeserializer.class)
     EventDeserializer eventDeserializer(
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            EventEnvelopeFactory eventEnvelopeFactory
     ) {
-        return new JacksonEventCodec(objectMapper);
+        return new JacksonEventCodec(
+                objectMapper,
+                eventEnvelopeFactory
+        );
     }
 
     @Bean

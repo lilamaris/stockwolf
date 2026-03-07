@@ -1,15 +1,21 @@
 package com.lilamaris.stockwolf.event.core.serializer;
 
 import com.lilamaris.stockwolf.event.core.*;
+import com.lilamaris.stockwolf.event.core.factory.EventEnvelopeFactory;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
 public class JacksonEventCodec implements EventCodec, EventSerializer, EventDeserializer {
     private final ObjectMapper objectMapper;
+    private final EventEnvelopeFactory eventEnvelopeFactory;
 
-    public JacksonEventCodec(ObjectMapper objectMapper) {
+    public JacksonEventCodec(
+            ObjectMapper objectMapper,
+            EventEnvelopeFactory eventEnvelopeFactory
+    ) {
         this.objectMapper = objectMapper;
+        this.eventEnvelopeFactory = eventEnvelopeFactory;
     }
 
     @Override
@@ -21,7 +27,7 @@ public class JacksonEventCodec implements EventCodec, EventSerializer, EventDese
 
         EventHeader eventHeader = objectMapper.readValue(rawHeader, SimpleEventHeader.class);
         EventTrace eventTrace = objectMapper.readValue(rawTrace, SimpleEventTrace.class);
-        return new SimpleEventEnvelope(eventHeader, eventTrace, rawPayload);
+        return eventEnvelopeFactory.build(eventHeader, eventTrace, rawPayload);
     }
 
     @Override
