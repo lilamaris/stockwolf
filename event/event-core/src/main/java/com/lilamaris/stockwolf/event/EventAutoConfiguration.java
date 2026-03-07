@@ -6,10 +6,7 @@ import com.lilamaris.stockwolf.event.core.outbound.*;
 import com.lilamaris.stockwolf.event.core.provider.*;
 import com.lilamaris.stockwolf.event.core.scheduler.EventScheduler;
 import com.lilamaris.stockwolf.event.core.scheduler.FixedDelayEventScheduler;
-import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
-import com.lilamaris.stockwolf.event.core.serializer.EventDeserializer;
-import com.lilamaris.stockwolf.event.core.serializer.EventSerializer;
-import com.lilamaris.stockwolf.event.core.serializer.JacksonEventCodec;
+import com.lilamaris.stockwolf.event.core.serializer.*;
 import com.lilamaris.stockwolf.event.core.store.EventStore;
 import com.lilamaris.stockwolf.event.core.store.SimpleEventStore;
 import com.lilamaris.stockwolf.event.core.store.SimpleStoredEventEnvelopeFactory;
@@ -145,24 +142,20 @@ public class EventAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(EventSerializer.class)
     EventSerializer eventSerializer(
-            ObjectMapper objectMapper,
-            EventEnvelopeFactory eventEnvelopeFactory
+            ObjectMapper objectMapper
     ) {
-        return new JacksonEventCodec(
-                objectMapper,
-                eventEnvelopeFactory
+        return new JacksonEventSerializer(
+                objectMapper
         );
     }
 
     @Bean
     @ConditionalOnMissingBean(EventDeserializer.class)
     EventDeserializer eventDeserializer(
-            ObjectMapper objectMapper,
-            EventEnvelopeFactory eventEnvelopeFactory
+            ObjectMapper objectMapper
     ) {
-        return new JacksonEventCodec(
-                objectMapper,
-                eventEnvelopeFactory
+        return new JacksonEventDeserializer(
+                objectMapper
         );
     }
 

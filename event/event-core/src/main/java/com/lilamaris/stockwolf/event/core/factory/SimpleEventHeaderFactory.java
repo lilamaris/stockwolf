@@ -3,6 +3,7 @@ package com.lilamaris.stockwolf.event.core.factory;
 import com.lilamaris.stockwolf.event.core.EventHeader;
 import com.lilamaris.stockwolf.event.core.EventKey;
 import com.lilamaris.stockwolf.event.core.SimpleEventHeader;
+import com.lilamaris.stockwolf.event.core.SimpleEventKey;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -19,6 +20,7 @@ public class SimpleEventHeaderFactory implements EventHeaderFactory {
     @Override
     public EventHeader build(EventKey eventKey) {
         Instant occurredAt = clock.instant();
-        return new SimpleEventHeader(eventKey, occurredAt);
+        var simpleEventKey = SimpleEventKey.of(eventKey);
+        return new SimpleEventHeader(simpleEventKey, occurredAt);
     }
 }

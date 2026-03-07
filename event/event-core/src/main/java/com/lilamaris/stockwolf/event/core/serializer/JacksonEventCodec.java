@@ -6,7 +6,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
-public class JacksonEventCodec implements EventCodec, EventSerializer, EventDeserializer {
+public class JacksonEventCodec implements EventCodec {
     private final ObjectMapper objectMapper;
     private final EventEnvelopeFactory eventEnvelopeFactory;
 
@@ -21,12 +21,18 @@ public class JacksonEventCodec implements EventCodec, EventSerializer, EventDese
     @Override
     public EventEnvelope decode(String raw) {
         JsonNode root = objectMapper.readTree(raw);
-        String rawHeader = requiredField(root, "header");
-        String rawTrace = requiredField(root, "trace");
-        String rawPayload = requiredField(root, "payload");
 
-        EventHeader eventHeader = objectMapper.readValue(rawHeader, SimpleEventHeader.class);
-        EventTrace eventTrace = objectMapper.readValue(rawTrace, SimpleEventTrace.class);
+        JsonNode headerNode = requiredNode(root, "header");
+        JsonNode traceNode = requiredNode(root, "trace");
+        JsonNode rawPayloadNode = requiredNode(root, "rawPayload");
+
+        EventHeader eventHeader = objectMapper.treeToValue(headerNode, SimpleEventHeader.class);
+        EventTrace eventTrace = objectMapper.treeToValue(traceNode, SimpleEventTrace.class);
+
+        String rawPayload = rawPayloadNode.isString()
+                ? rawPayloadNode.asString()
+                : rawPayloadNode.toString();
+
         return eventEnvelopeFactory.build(eventHeader, eventTrace, rawPayload);
     }
 
@@ -41,23 +47,11 @@ public class JacksonEventCodec implements EventCodec, EventSerializer, EventDese
         return objectMapper.writeValueAsString(root);
     }
 
-    @Override
-    public <P extends EventPayload> P materialize(String rawPayload, Class<P> payloadType) {
-        return objectMapper.readValue(rawPayload, payloadType);
-    }
-
-    @Override
-    public String stringify(Object object) {
-        return objectMapper.writeValueAsString(object);
-    }
-
-    private String requiredField(JsonNode root, String field) {
+    private JsonNode requiredNode(JsonNode root, String field) {
         JsonNode n = root.get(field);
-
-        if (n == null || n.isNull() || n.asString().isBlank()) {
+        if (n == null || n.isNull()) {
             throw new IllegalArgumentException("Missing field: " + field);
         }
-
-        return n.asString();
+        return n;
     }
 }
