@@ -21,8 +21,6 @@ public class SimpleOutboundRelay implements OutboundRelay {
     public void batch(int size) {
         var batch = store.claimBatch(size, EventFlow.OUTBOUND);
 
-        log.debug("Outbound batch claim {} events.", batch.size());
-
         for (var e : batch) {
             try {
                 eventSender.send(e);
