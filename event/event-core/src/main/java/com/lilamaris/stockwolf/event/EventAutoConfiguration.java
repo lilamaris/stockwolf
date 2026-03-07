@@ -30,14 +30,12 @@ public class EventAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(InboundRelay.class)
     InboundRelay inboundRelay(
-            EventListenerRegistrar eventListenerRegistrar,
-            EventDeserializer eventDeserializer,
-            EventStore eventStore
+            EventStore eventStore,
+            EventRouter eventRouter
     ) {
         return new SimpleInboundRelay(
-                eventListenerRegistrar,
-                eventDeserializer,
-                eventStore
+                eventStore,
+                eventRouter
         );
     }
 
@@ -59,10 +57,12 @@ public class EventAutoConfiguration {
     @ConditionalOnMissingBean(EventScheduler.class)
     EventScheduler eventScheduler(
             OutboundRelay outboundRelay,
+            InboundRelay inboundRelay,
             EventProperties properties
     ) {
         return new FixedDelayEventScheduler(
                 outboundRelay,
+                inboundRelay,
                 properties.scheduler().batchSize()
         );
     }
