@@ -1,7 +1,7 @@
 package com.lilamaris.stockwolf.event.support.kafka;
 
-import com.lilamaris.stockwolf.event.core.EventEnvelope;
+import com.lilamaris.stockwolf.event.core.outbound.EventDefinition;
 
 public interface TopicFactory {
-    String build(EventEnvelope eventEnvelope);
+    String build(EventDefinition<?> eventDefinition);
 }
