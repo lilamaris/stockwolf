@@ -8,8 +8,8 @@ import com.lilamaris.stockwolf.event.core.scheduler.EventScheduler;
 import com.lilamaris.stockwolf.event.core.scheduler.FixedDelayEventScheduler;
 import com.lilamaris.stockwolf.event.core.serializer.EventCodec;
 import com.lilamaris.stockwolf.event.core.serializer.JacksonEventCodec;
-import com.lilamaris.stockwolf.event.core.serializer.PayloadDeserializer;
-import com.lilamaris.stockwolf.event.core.serializer.PayloadSerializer;
+import com.lilamaris.stockwolf.event.core.serializer.EventDeserializer;
+import com.lilamaris.stockwolf.event.core.serializer.EventSerializer;
 import com.lilamaris.stockwolf.event.core.store.EventStore;
 import com.lilamaris.stockwolf.event.core.store.SimpleEventStore;
 import com.lilamaris.stockwolf.event.core.store.SimpleStoredEventEnvelopeFactory;
@@ -34,12 +34,12 @@ public class EventAutoConfiguration {
     @ConditionalOnMissingBean(InboundRelay.class)
     InboundRelay inboundRelay(
             EventListenerRegistrar eventListenerRegistrar,
-            PayloadDeserializer payloadDeserializer,
+            EventDeserializer eventDeserializer,
             EventStore eventStore
     ) {
         return new SimpleInboundRelay(
                 eventListenerRegistrar,
-                payloadDeserializer,
+                eventDeserializer,
                 eventStore
         );
     }
@@ -75,14 +75,14 @@ public class EventAutoConfiguration {
             EventTraceFactory eventTraceFactory,
             EventEnvelopeFactory eventEnvelopeFactory,
             EventStore eventStore,
-            PayloadSerializer payloadSerializer
+            EventSerializer eventSerializer
     ) {
         return new SimpleEventPublisher(
                 eventHeaderFactory,
                 eventTraceFactory,
                 eventEnvelopeFactory,
                 eventStore,
-                payloadSerializer
+                eventSerializer
         );
     }
 
@@ -100,6 +100,12 @@ public class EventAutoConfiguration {
     @ConditionalOnMissingBean(EventSender.class)
     EventSender eventSender() {
         return new LogOnlyEventSender();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(EventRouter.class)
+    EventRouter eventRouter() {
+        return new LogOnlyEventRouter();
     }
 
     @Bean
@@ -131,16 +137,16 @@ public class EventAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(PayloadSerializer.class)
-    PayloadSerializer payloadSerializer(
+    @ConditionalOnMissingBean(EventSerializer.class)
+    EventSerializer eventSerializer(
             ObjectMapper objectMapper
     ) {
         return new JacksonEventCodec(objectMapper);
     }
 
     @Bean
-    @ConditionalOnMissingBean(PayloadDeserializer.class)
-    PayloadDeserializer payloadDeserializer(
+    @ConditionalOnMissingBean(EventDeserializer.class)
+    EventDeserializer eventDeserializer(
             ObjectMapper objectMapper
     ) {
         return new JacksonEventCodec(objectMapper);

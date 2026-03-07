@@ -4,7 +4,7 @@ import com.lilamaris.stockwolf.event.core.EventEnvelope;
 import com.lilamaris.stockwolf.event.core.EventHeader;
 import com.lilamaris.stockwolf.event.core.EventPayload;
 import com.lilamaris.stockwolf.event.core.EventTrace;
-import com.lilamaris.stockwolf.event.core.serializer.PayloadDeserializer;
+import com.lilamaris.stockwolf.event.core.serializer.EventDeserializer;
 import com.lilamaris.stockwolf.event.core.store.EventFlow;
 import com.lilamaris.stockwolf.event.core.store.EventStore;
 import org.slf4j.Logger;
@@ -15,16 +15,16 @@ import java.util.List;
 public class SimpleInboundRelay implements InboundRelay {
     private static final Logger log = LoggerFactory.getLogger(SimpleInboundRelay.class);
     private final EventListenerRegistrar eventListenerRegistrar;
-    private final PayloadDeserializer payloadDeserializer;
+    private final EventDeserializer eventDeserializer;
     private final EventStore eventStore;
 
     public SimpleInboundRelay(
             EventListenerRegistrar eventListenerRegistrar,
-            PayloadDeserializer payloadDeserializer,
+            EventDeserializer eventDeserializer,
             EventStore eventStore
     ) {
         this.eventListenerRegistrar = eventListenerRegistrar;
-        this.payloadDeserializer = payloadDeserializer;
+        this.eventDeserializer = eventDeserializer;
         this.eventStore = eventStore;
     }
 
@@ -42,7 +42,7 @@ public class SimpleInboundRelay implements InboundRelay {
                 continue;
             }
 
-            var payload = payloadDeserializer.materialize(e.rawPayload(), listener.payload());
+            var payload = eventDeserializer.materialize(e.rawPayload(), listener.payload());
 
             invoke(
                     listener,

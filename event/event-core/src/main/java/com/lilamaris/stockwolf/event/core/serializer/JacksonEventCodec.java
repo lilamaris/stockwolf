@@ -5,7 +5,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
-public class JacksonEventCodec implements EventCodec, PayloadSerializer, PayloadDeserializer {
+public class JacksonEventCodec implements EventCodec, EventSerializer, EventDeserializer {
     private final ObjectMapper objectMapper;
 
     public JacksonEventCodec(ObjectMapper objectMapper) {
@@ -41,8 +41,8 @@ public class JacksonEventCodec implements EventCodec, PayloadSerializer, Payload
     }
 
     @Override
-    public <P extends EventPayload> String stringify(P payload) {
-        return objectMapper.writeValueAsString(payload);
+    public String stringify(Object object) {
+        return objectMapper.writeValueAsString(object);
     }
 
     private String requiredField(JsonNode root, String field) {

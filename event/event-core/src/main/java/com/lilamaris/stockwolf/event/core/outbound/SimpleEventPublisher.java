@@ -4,7 +4,7 @@ import com.lilamaris.stockwolf.event.core.*;
 import com.lilamaris.stockwolf.event.core.factory.EventEnvelopeFactory;
 import com.lilamaris.stockwolf.event.core.factory.EventHeaderFactory;
 import com.lilamaris.stockwolf.event.core.factory.EventTraceFactory;
-import com.lilamaris.stockwolf.event.core.serializer.PayloadSerializer;
+import com.lilamaris.stockwolf.event.core.serializer.EventSerializer;
 import com.lilamaris.stockwolf.event.core.store.EventFlow;
 import com.lilamaris.stockwolf.event.core.store.EventStore;
 import org.slf4j.Logger;
@@ -16,20 +16,20 @@ public class SimpleEventPublisher implements EventPublisher {
     private final EventTraceFactory eventTraceFactory;
     private final EventEnvelopeFactory eventEnvelopeFactory;
     private final EventStore eventStore;
-    private final PayloadSerializer payloadSerializer;
+    private final EventSerializer eventSerializer;
 
     public SimpleEventPublisher(
             EventHeaderFactory eventHeaderFactory,
             EventTraceFactory eventTraceFactory,
             EventEnvelopeFactory eventEnvelopeFactory,
             EventStore eventStore,
-            PayloadSerializer payloadSerializer
+            EventSerializer eventSerializer
     ) {
         this.eventHeaderFactory = eventHeaderFactory;
         this.eventTraceFactory = eventTraceFactory;
         this.eventEnvelopeFactory = eventEnvelopeFactory;
         this.eventStore = eventStore;
-        this.payloadSerializer = payloadSerializer;
+        this.eventSerializer = eventSerializer;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class SimpleEventPublisher implements EventPublisher {
                 eventDynamicContext.causationId()
         );
 
-        String rawPayload = payloadSerializer.stringify(eventPayload);
+        String rawPayload = eventSerializer.stringify(eventPayload);
 
         EventEnvelope eventEnvelope = eventEnvelopeFactory.build(eventHeader, eventTrace, rawPayload);
 
