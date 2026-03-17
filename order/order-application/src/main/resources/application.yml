@@ -1,6 +1,16 @@
 server:
   port: 8081
 
+logging:
+  level:
+    com.lilamaris.stockwolf.event: debug
+
+event:
+  message:
+    topic: "event"
+  scheduler:
+    batchSize: 100
+
 spring:
   application:
     name: stockwolf-order
