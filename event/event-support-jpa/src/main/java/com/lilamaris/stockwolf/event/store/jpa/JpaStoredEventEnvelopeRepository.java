@@ -1,5 +1,6 @@
 package com.lilamaris.stockwolf.event.store.jpa;
 
+import com.lilamaris.stockwolf.event.core.store.EventFlow;
 import com.lilamaris.stockwolf.event.core.store.StoredEventStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,9 +14,11 @@ public interface JpaStoredEventEnvelopeRepository extends JpaRepository<JpaStore
             SELECT e
             FROM JpaStoredEventEnvelope e
             WHERE e.status = :status
+                AND e.eventFlow = :eventFlow
             ORDER BY e.eventHeader.occurredAt ASC""")
     List<JpaStoredEventEnvelope> claimBatch(
             @Param("status") StoredEventStatus status,
+            @Param("eventFlow") EventFlow eventFlow,
             Pageable pageable
     );
 }

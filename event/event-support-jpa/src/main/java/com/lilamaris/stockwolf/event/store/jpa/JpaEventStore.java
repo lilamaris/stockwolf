@@ -38,7 +38,7 @@ public class JpaEventStore implements EventStore {
     @Transactional
     public List<? extends StoredEventEnvelope> claimBatch(int size, EventFlow flow) {
         var page = PageRequest.of(0, size);
-        return repository.claimBatch(StoredEventStatus.PROCESSING, page);
+        return repository.claimBatch(StoredEventStatus.PROCESSING, flow, page);
     }
 
     @Override
