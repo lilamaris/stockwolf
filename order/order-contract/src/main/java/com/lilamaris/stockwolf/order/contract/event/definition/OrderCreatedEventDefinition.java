@@ -1,7 +1,7 @@
 package com.lilamaris.stockwolf.order.contract.event.definition;
 
-import com.lilamaris.stockwolf.event.core.outbound.EventDefinition;
 import com.lilamaris.stockwolf.event.core.EventKey;
+import com.lilamaris.stockwolf.event.core.outbound.EventDefinition;
 import com.lilamaris.stockwolf.order.contract.event.payload.OrderCreatedEventPayload;
 
 public class OrderCreatedEventDefinition implements EventDefinition<OrderCreatedEventPayload> {

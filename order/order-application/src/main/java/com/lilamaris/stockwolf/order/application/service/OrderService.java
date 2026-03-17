@@ -1,7 +1,7 @@
 package com.lilamaris.stockwolf.order.application.service;
 
-import com.lilamaris.stockwolf.event.core.outbound.OutboundStore;
-import com.lilamaris.stockwolf.event.core.DefaultEventContext;
+import com.lilamaris.stockwolf.event.core.factory.EventDynamicContextFactory;
+import com.lilamaris.stockwolf.event.core.outbound.EventPublisher;
 import com.lilamaris.stockwolf.order.application.port.in.CreateOrderCommand;
 import com.lilamaris.stockwolf.order.application.port.in.OrderEntry;
 import com.lilamaris.stockwolf.order.application.port.in.OrderManager;
@@ -21,7 +21,8 @@ public class OrderService implements OrderManager {
     private final OrderStore orderStore;
 
     private final ActorContext actorContext;
-    private final OutboundStore outboundStore;
+    private final EventDynamicContextFactory eventDynamicContextFactory;
+    private final EventPublisher eventPublisher;
 
     @Override
     public OrderEntry create(CreateOrderCommand command) {
@@ -42,9 +43,15 @@ public class OrderService implements OrderManager {
 
         orderStore.save(order);
 
-        outboundStore.enqueue(
+        var eventDynamicContext = eventDynamicContextFactory.build(
+                "order",
+                order.getId().toString(),
+                null,
+                null
+        );
+        eventPublisher.publish(
                 OrderEventKey.ORDER_CREATED,
-                new DefaultEventContext("order", order.getId().toString(), null, null),
+                eventDynamicContext,
                 new OrderCreatedEventPayload(order.getId().toString())
         );
 
